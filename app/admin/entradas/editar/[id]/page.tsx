@@ -2,7 +2,7 @@ import Navbar from '@/components/Navbar';
 import { createClient } from '@/lib/supabase/server';
 import { getUserProfile } from '@/lib/supabase/auth';
 import { redirect, notFound } from 'next/navigation';
-import EntradaForm from '../EntradaForm';
+import EntradaForm from '../../EntradaForm';
 
 export default async function EditarEntradaPage({
   params,
