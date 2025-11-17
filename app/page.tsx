@@ -254,7 +254,7 @@ export default async function Home() {
         {/* Footer */}
         <footer className="bg-gray-900 text-gray-400 py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p>© 2025 Blog Educativo - IA y Robótica. Todos los derechos reservados.</p>
+            <p>© 2025 Iron Makers & AI. Todos los derechos reservados.</p>
           </div>
         </footer>
       </main>

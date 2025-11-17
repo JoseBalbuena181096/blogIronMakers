@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Panel de Administración - Blog Educativo',
+  title: 'Panel de Administración - Iron Makers & AI',
   description: 'Gestiona cursos, usuarios y contenido',
 };
 

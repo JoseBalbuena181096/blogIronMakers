@@ -7,9 +7,13 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-8">
             <a href="/" className="flex items-center gap-2">
-              <span className="text-2xl">🚀</span>
+              <img 
+                src="https://zksisjytdffzxjtplwsd.supabase.co/storage/v1/object/public/images/team/logo_imakers.svg" 
+                alt="Iron Makers" 
+                className="w-8 h-8 rounded-full"
+              />
               <span className="font-bold text-xl text-gray-900 dark:text-white">
-                Blog Educativo
+                Iron Makers & AI
               </span>
             </a>
             <div className="hidden md:flex gap-6">

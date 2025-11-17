@@ -6,7 +6,7 @@ import Link from 'next/link';
 import type { Curso, Inscripcion, Certificado } from '@/types/database';
 
 export const metadata = {
-  title: 'Mis Cursos - Blog Educativo',
+  title: 'Mis Cursos - Iron Makers & AI',
   description: 'Gestiona tu progreso y accede a tus certificados',
 };
 

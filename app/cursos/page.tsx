@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type { Curso } from '@/types/database';
 
 export const metadata = {
-  title: 'Cursos - Blog Educativo',
+  title: 'Cursos - Iron Makers & AI',
   description: 'Explora nuestros cursos de Inteligencia Artificial y Robótica',
 };
 
