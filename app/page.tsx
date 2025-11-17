@@ -28,9 +28,9 @@ export default async function Home() {
   const { data: proyectos } = await supabase
     .from('proyectos_destacados')
     .select('*')
-    .eq('destacado', true)
-    .order('fecha_creacion', { ascending: false })
-    .limit(3);
+    .eq('visible', true)
+    .order('orden')
+    .limit(6);
 
   // Fetch cursos para mostrar en preview
   const { data: cursos } = await supabase
