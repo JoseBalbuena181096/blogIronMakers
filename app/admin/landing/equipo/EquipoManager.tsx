@@ -7,12 +7,11 @@ import { useRouter } from 'next/navigation';
 interface Integrante {
   id: string;
   nombre: string;
-  rol: string;
-  bio: string;
+  rol: string | null;
+  bio: string | null;
   foto_url: string | null;
   linkedin_url: string | null;
   orden: number;
-  visible: boolean;
 }
 
 export default function EquipoManager({ integrantes: integrantesIniciales }: { integrantes: Integrante[] }) {
@@ -21,20 +20,31 @@ export default function EquipoManager({ integrantes: integrantesIniciales }: { i
   const [editando, setEditando] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSave = async (integrante: Integrante) => {
+  const handleSave = async (id: string) => {
     setLoading(true);
     try {
+      const integrante = integrantes.find(i => i.id === id);
+      if (!integrante) return;
+
       const supabase = createClient();
       const { error } = await supabase
         .from('integrantes_equipo')
-        .update(integrante)
+        .update({
+          nombre: integrante.nombre,
+          rol: integrante.rol,
+          bio: integrante.bio,
+          foto_url: integrante.foto_url,
+          linkedin_url: integrante.linkedin_url,
+          orden: integrante.orden
+        })
         .eq('id', integrante.id);
 
       if (error) throw error;
       setEditando(null);
+      alert('✅ Integrante guardado correctamente');
       router.refresh();
     } catch (err: any) {
-      alert(err.message || 'Error al guardar');
+      alert('❌ Error al guardar: ' + (err.message || 'Error desconocido'));
     } finally {
       setLoading(false);
     }
@@ -46,6 +56,29 @@ export default function EquipoManager({ integrantes: integrantesIniciales }: { i
     );
   };
 
+  const handleEliminar = async (id: string, nombre: string) => {
+    if (!confirm(`¿Estás seguro de eliminar a ${nombre} del equipo?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('integrantes_equipo')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      alert('✅ Integrante eliminado correctamente');
+      router.refresh();
+    } catch (err: any) {
+      alert('❌ Error al eliminar: ' + (err.message || 'Error desconocido'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {integrantes.map((integrante) => (
@@ -55,24 +88,12 @@ export default function EquipoManager({ integrantes: integrantesIniciales }: { i
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                 {integrante.nombre}
               </h3>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={integrante.visible}
-                  onChange={(e) => {
-                    updateIntegrante(integrante.id, 'visible', e.target.checked);
-                    handleSave({ ...integrante, visible: e.target.checked });
-                  }}
-                  className="rounded"
-                />
-                <span className="text-gray-600 dark:text-gray-400">Visible</span>
-              </label>
             </div>
 
             {editando === integrante.id ? (
               <div className="flex gap-2">
                 <button
-                  onClick={() => handleSave(integrante)}
+                  onClick={() => handleSave(integrante.id)}
                   disabled={loading}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
@@ -114,7 +135,7 @@ export default function EquipoManager({ integrantes: integrantesIniciales }: { i
                 </label>
                 <input
                   type="text"
-                  value={integrante.rol}
+                  value={integrante.rol || ''}
                   onChange={(e) => updateIntegrante(integrante.id, 'rol', e.target.value)}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
@@ -124,7 +145,7 @@ export default function EquipoManager({ integrantes: integrantesIniciales }: { i
                   Bio
                 </label>
                 <textarea
-                  value={integrante.bio}
+                  value={integrante.bio || ''}
                   onChange={(e) => updateIntegrante(integrante.id, 'bio', e.target.value)}
                   rows={3}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -160,6 +181,19 @@ export default function EquipoManager({ integrantes: integrantesIniciales }: { i
               {integrante.linkedin_url && (
                 <p><strong>LinkedIn:</strong> {integrante.linkedin_url}</p>
               )}
+            </div>
+          )}
+
+          {/* Botón de eliminar */}
+          {editando !== integrante.id && (
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => handleEliminar(integrante.id, integrante.nombre)}
+                disabled={loading}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition text-sm"
+              >
+                🗑️ Eliminar Miembro
+              </button>
             </div>
           )}
         </div>

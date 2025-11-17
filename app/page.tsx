@@ -128,15 +128,23 @@ export default async function Home() {
               <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
                 Nuestro Equipo
               </h2>
-              <div className="grid md:grid-cols-3 gap-8">
+              <div className="flex flex-wrap justify-center gap-8">
                 {integrantes.map((integrante) => (
                   <div
                     key={integrante.id}
-                    className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center"
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center w-full sm:w-80"
                   >
-                    <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">
-                      {integrante.nombre.charAt(0)}
-                    </div>
+                    {integrante.foto_url ? (
+                      <img
+                        src={integrante.foto_url}
+                        alt={integrante.nombre}
+                        className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">
+                        {integrante.nombre.charAt(0)}
+                      </div>
+                    )}
                     <h3 className="text-xl font-bold mb-1 text-gray-900 dark:text-white">
                       {integrante.nombre}
                     </h3>
@@ -144,18 +152,21 @@ export default async function Home() {
                       {integrante.rol}
                     </p>
                     {integrante.bio && (
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
                         {integrante.bio}
                       </p>
                     )}
                     {integrante.linkedin_url && (
                       <a
-                        href={integrante.linkedin_url}
+                        href={integrante.linkedin_url.startsWith('http') ? integrante.linkedin_url : `https://${integrante.linkedin_url}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block mt-4 text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                        className="inline-flex items-center gap-2 mt-4 text-blue-600 hover:text-blue-700 dark:text-blue-400 font-semibold"
                       >
-                        LinkedIn →
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                        </svg>
+                        LinkedIn
                       </a>
                     )}
                   </div>
@@ -178,9 +189,17 @@ export default async function Home() {
                     key={proyecto.id}
                     className="bg-gray-50 dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden"
                   >
-                    <div className="h-48 bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-                      <span className="text-6xl">🤖</span>
-                    </div>
+                    {proyecto.imagen_url ? (
+                      <img
+                        src={proyecto.imagen_url}
+                        alt={proyecto.titulo}
+                        className="w-full h-48 object-cover"
+                      />
+                    ) : (
+                      <div className="h-48 bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                        <span className="text-6xl">🤖</span>
+                      </div>
+                    )}
                     <div className="p-6">
                       <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
                         {proyecto.titulo}
