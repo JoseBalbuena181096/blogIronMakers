@@ -63,6 +63,12 @@ export default async function AdminProyectosPage() {
               <button className="px-4 py-2 border-b-2 border-blue-600 text-blue-600 font-semibold">
                 Proyectos
               </button>
+              <Link
+                href="/admin/landing/redes"
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              >
+                Redes Sociales
+              </Link>
             </div>
           </div>
 

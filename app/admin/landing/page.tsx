@@ -37,6 +37,12 @@ export default async function AdminLandingPage() {
     .select('*')
     .order('fecha_creacion', { ascending: false });
 
+  // Obtener redes sociales
+  const { data: redesSociales } = await supabase
+    .from('redes_sociales')
+    .select('*')
+    .order('orden');
+
   return (
     <>
       <Navbar />
@@ -78,6 +84,12 @@ export default async function AdminLandingPage() {
                 className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               >
                 Proyectos ({proyectos?.length || 0})
+              </Link>
+              <Link
+                href="/admin/landing/redes"
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              >
+                Redes Sociales ({redesSociales?.length || 0})
               </Link>
             </div>
           </div>
