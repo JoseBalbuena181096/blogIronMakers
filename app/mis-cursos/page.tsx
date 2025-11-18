@@ -55,6 +55,12 @@ export default async function MisCursosPage() {
     .eq('user_id', user.id)
     .order('fecha_emision', { ascending: false });
 
+  // Filtrar solo certificados de cursos completados
+  const certificadosValidos = certificados?.filter((cert: any) => {
+    const inscripcion = inscripciones?.find((i: any) => i.curso_id === cert.curso_id);
+    return inscripcion?.estado === 'completado';
+  }) || [];
+
   const cursosActivos = inscripciones?.filter(
     (i: any) => i.estado === 'inscrito'
   ) || [];
@@ -102,7 +108,7 @@ export default async function MisCursosPage() {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
               <div className="text-3xl mb-2">🏆</div>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                {certificados?.length || 0}
+                {certificadosValidos.length}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Certificados
@@ -232,13 +238,13 @@ export default async function MisCursosPage() {
           )}
 
           {/* Certificados */}
-          {certificados && certificados.length > 0 && (
+          {certificadosValidos && certificadosValidos.length > 0 && (
             <section className="mb-12">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 Mis Certificados
               </h2>
               <div className="grid md:grid-cols-2 gap-6">
-                {certificados.map((certificado: any) => {
+                {certificadosValidos.map((certificado: any) => {
                   const curso = certificado.cursos as Curso;
 
                   return (
