@@ -41,26 +41,23 @@ export default function DownloadCertificateButton({
     doc.setLineWidth(0.5);
     doc.rect(15, 15, pageWidth - 30, pageHeight - 30, 'S');
 
-    // Cargar y agregar logo
+    // Cargar y agregar logo PNG
     try {
-      const logoUrl = 'https://zksisjytdffzxjtplwsd.supabase.co/storage/v1/object/public/images/team/logo_oficial.svg';
-      const response = await fetch(logoUrl);
-      const svgText = await response.text();
+      const logoUrl = 'https://zksisjytdffzxjtplwsd.supabase.co/storage/v1/object/public/images/team/logo_oficial_png.png';
       
-      // Convertir SVG a data URL (base64)
-      const blob = new Blob([svgText], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(blob);
+      // Crear imagen y esperar a que cargue
       const img = new Image();
+      img.crossOrigin = 'anonymous';
       
-      await new Promise((resolve) => {
+      await new Promise((resolve, reject) => {
         img.onload = resolve;
-        img.src = url;
+        img.onerror = reject;
+        img.src = logoUrl;
       });
       
-      // Agregar logo al PDF (centrado arriba)
+      // Agregar logo al PDF (centrado arriba del nombre de la empresa)
       const logoSize = 15; // tamaño del logo en mm
       doc.addImage(img, 'PNG', pageWidth / 2 - logoSize / 2, 20, logoSize, logoSize);
-      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error cargando logo:', error);
       // Continuar sin logo si hay error
