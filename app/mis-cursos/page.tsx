@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { getUser } from '@/lib/supabase/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import type { Curso, Inscripcion, Certificado } from '@/types/database';
+import type { Curso, Inscripcion, Certificado, IntegranteEquipo, Profile } from '@/types/database';
+import DownloadCertificateButton from './DownloadCertificateButton';
 
 export const metadata = {
   title: 'Mis Cursos - Iron Makers & AI',
@@ -18,6 +19,21 @@ export default async function MisCursosPage() {
   }
 
   const supabase = await createClient();
+
+  // Obtener perfil del usuario
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('nombre')
+    .eq('id', user.id)
+    .single();
+
+  // Obtener el primer instructor (será quien certifica los cursos)
+  const { data: instructor } = await supabase
+    .from('integrantes_equipo')
+    .select('nombre, rol')
+    .order('orden', { ascending: true })
+    .limit(1)
+    .single();
 
   // Obtener inscripciones con información del curso
   const { data: inscripciones } = await supabase
@@ -248,16 +264,17 @@ export default async function MisCursosPage() {
                         </p>
                       </div>
 
-                      {certificado.url_pdf && (
-                        <a
-                          href={certificado.url_pdf}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block text-center bg-white text-blue-600 px-6 py-2 rounded-lg font-bold hover:bg-blue-50 transition"
-                        >
-                          Descargar PDF
-                        </a>
-                      )}
+                      <DownloadCertificateButton
+                        certificateData={{
+                          studentName: profile?.nombre || user.email || 'Estudiante',
+                          courseName: curso.titulo,
+                          duration: curso.duracion_estimada,
+                          verificationCode: certificado.codigo_verificacion,
+                          issueDate: certificado.fecha_emision,
+                          instructorName: instructor?.nombre || 'Instructor',
+                          instructorRole: instructor?.rol || 'Instructor Principal',
+                        }}
+                      />
                     </div>
                   );
                 })}
