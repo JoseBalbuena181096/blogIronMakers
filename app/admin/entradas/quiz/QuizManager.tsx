@@ -139,15 +139,18 @@ export default function QuizManager({
     setPreguntas(nuevasPreguntas);
   };
 
-  const actualizarOpcion = (preguntaIdx: number, opcionIdx: number, campo: keyof Opcion, valor: any) => {
+  const actualizarOpcion = (preguntaIdx: number, opcionIdx: number, campo: keyof Opcion, valor: string | boolean) => {
     const nuevasPreguntas = [...preguntas];
-    nuevasPreguntas[preguntaIdx].opciones[opcionIdx][campo] = valor;
-    
-    // Si se marca una como correcta, desmarcar las demás
-    if (campo === 'es_correcta' && valor === true) {
-      nuevasPreguntas[preguntaIdx].opciones.forEach((op, idx) => {
-        if (idx !== opcionIdx) op.es_correcta = false;
-      });
+    if (campo === 'texto') {
+      nuevasPreguntas[preguntaIdx].opciones[opcionIdx].texto = valor as string;
+    } else if (campo === 'es_correcta') {
+      nuevasPreguntas[preguntaIdx].opciones[opcionIdx].es_correcta = valor as boolean;
+      // Si se marca una como correcta, desmarcar las demás
+      if (valor === true) {
+        nuevasPreguntas[preguntaIdx].opciones.forEach((op, idx) => {
+          if (idx !== opcionIdx) op.es_correcta = false;
+        });
+      }
     }
     
     setPreguntas(nuevasPreguntas);
