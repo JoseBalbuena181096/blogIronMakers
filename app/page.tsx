@@ -85,9 +85,19 @@ export default async function Home() {
                     href={`/cursos/${curso.slug}`}
                     className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition"
                   >
-                    <div className="h-48 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                      <span className="text-6xl">📚</span>
-                    </div>
+                    {curso.imagen_portada ? (
+                      <div className="h-48 overflow-hidden">
+                        <img
+                          src={curso.imagen_portada}
+                          alt={curso.titulo}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-48 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                        <span className="text-6xl">📚</span>
+                      </div>
+                    )}
                     <div className="p-6">
                       <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
                         {curso.titulo}
