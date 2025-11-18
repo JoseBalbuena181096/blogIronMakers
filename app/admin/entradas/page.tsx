@@ -126,6 +126,13 @@ export default async function AdminEntradasPage({
                     {/* Actions */}
                     <div className="flex items-center gap-2 ml-4">
                       <Link
+                        href={`/admin/entradas/quiz?entrada=${entrada.id}`}
+                        className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm"
+                        title="Gestionar Quiz"
+                      >
+                        📝 Quiz
+                      </Link>
+                      <Link
                         href={`/admin/entradas/editar/${entrada.id}`}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
                       >

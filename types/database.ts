@@ -84,6 +84,24 @@ export interface ProyectoDestacado {
   destacado: boolean;
 }
 
+export interface QuizPregunta {
+  id: string;
+  entrada_id: string;
+  pregunta: string;
+  opciones: { texto: string; es_correcta: boolean }[];
+  orden: number;
+  creado_en: string;
+}
+
+export interface QuizIntento {
+  id: string;
+  user_id: string;
+  entrada_id: string;
+  puntuacion: number;
+  respuestas: Record<string, number>;
+  fecha_intento: string;
+}
+
 // Tipos de bloques de contenido
 export type TipoBloque = 'texto' | 'imagen' | 'codigo' | 'latex' | 'video' | 'markdown';
 
