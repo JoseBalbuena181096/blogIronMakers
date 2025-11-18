@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import ResetPasswordForm from './ResetPasswordForm';
+import { Suspense } from 'react';
 
 export const metadata = {
   title: 'Restablecer Contraseña - Iron Makers & AI',
@@ -29,8 +30,17 @@ export default function ResetPasswordPage() {
           </p>
         </div>
 
-        <ResetPasswordForm />
+        <Suspense fallback={
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          </div>
+        }>
+          <ResetPasswordForm />
+        </Suspense>
       </div>
+    </div>
+  );
+}
     </div>
   );
 }
