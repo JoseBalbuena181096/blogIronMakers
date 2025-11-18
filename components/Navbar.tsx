@@ -8,7 +8,7 @@ export default function Navbar() {
           <div className="flex items-center gap-8">
             <a href="/" className="flex items-center gap-2">
               <img 
-                src="https://zksisjytdffzxjtplwsd.supabase.co/storage/v1/object/public/images/team/logo_imakers.svg" 
+                src="https://zksisjytdffzxjtplwsd.supabase.co/storage/v1/object/public/images/team/logo_oficial.svg" 
                 alt="Iron Makers" 
                 className="w-8 h-8 rounded-full"
               />
