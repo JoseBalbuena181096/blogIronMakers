@@ -14,7 +14,7 @@ export default function ResetPasswordPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <img 
-              src="https://zksisjytdffzxjtplwsd.supabase.co/storage/v1/object/public/images/team/logo_imakers.svg" 
+              src="https://zksisjytdffzxjtplwsd.supabase.co/storage/v1/object/public/images/team/logo_oficial.svg" 
               alt="Iron Makers" 
               className="w-10 h-10 rounded-full"
             />
