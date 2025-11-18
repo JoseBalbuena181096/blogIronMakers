@@ -17,7 +17,7 @@ interface DownloadCertificateButtonProps {
 export default function DownloadCertificateButton({
   certificateData,
 }: DownloadCertificateButtonProps) {
-  const generatePDF = () => {
+  const generatePDF = async () => {
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
@@ -41,21 +41,46 @@ export default function DownloadCertificateButton({
     doc.setLineWidth(0.5);
     doc.rect(15, 15, pageWidth - 30, pageHeight - 30, 'S');
 
+    // Cargar y agregar logo
+    try {
+      const logoUrl = 'https://zksisjytdffzxjtplwsd.supabase.co/storage/v1/object/public/images/team/logo_oficial.svg';
+      const response = await fetch(logoUrl);
+      const svgText = await response.text();
+      
+      // Convertir SVG a data URL (base64)
+      const blob = new Blob([svgText], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      
+      await new Promise((resolve) => {
+        img.onload = resolve;
+        img.src = url;
+      });
+      
+      // Agregar logo al PDF (centrado arriba)
+      const logoSize = 15; // tamaño del logo en mm
+      doc.addImage(img, 'PNG', pageWidth / 2 - logoSize / 2, 20, logoSize, logoSize);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error cargando logo:', error);
+      // Continuar sin logo si hay error
+    }
+
     // Logo/Encabezado - "Iron Makers & AI"
     doc.setFontSize(32);
     doc.setTextColor(37, 99, 235); // blue-600
     doc.setFont('helvetica', 'bold');
-    doc.text('Iron Makers & AI', pageWidth / 2, 35, { align: 'center' });
+    doc.text('Iron Makers & AI', pageWidth / 2, 45, { align: 'center' });
 
     // Línea decorativa
     doc.setDrawColor(99, 102, 241);
     doc.setLineWidth(0.3);
-    doc.line(pageWidth / 2 - 50, 40, pageWidth / 2 + 50, 40);
+    doc.line(pageWidth / 2 - 50, 50, pageWidth / 2 + 50, 50);
 
     // Título "CERTIFICADO"
     doc.setFontSize(28);
     doc.setTextColor(55, 65, 81); // gray-700
-    doc.text('CERTIFICADO DE FINALIZACIÓN', pageWidth / 2, 55, {
+    doc.text('CERTIFICADO DE FINALIZACIÓN', pageWidth / 2, 65, {
       align: 'center',
     });
 
@@ -63,26 +88,26 @@ export default function DownloadCertificateButton({
     doc.setFontSize(14);
     doc.setTextColor(107, 114, 128); // gray-500
     doc.setFont('helvetica', 'normal');
-    doc.text('Se otorga a', pageWidth / 2, 70, { align: 'center' });
+    doc.text('Se otorga a', pageWidth / 2, 80, { align: 'center' });
 
     // Nombre del estudiante
     doc.setFontSize(24);
     doc.setTextColor(17, 24, 39); // gray-900
     doc.setFont('helvetica', 'bold');
-    doc.text(certificateData.studentName, pageWidth / 2, 85, {
+    doc.text(certificateData.studentName, pageWidth / 2, 95, {
       align: 'center',
     });
 
     // Línea debajo del nombre
     doc.setDrawColor(209, 213, 219); // gray-300
     doc.setLineWidth(0.3);
-    doc.line(pageWidth / 2 - 60, 88, pageWidth / 2 + 60, 88);
+    doc.line(pageWidth / 2 - 60, 98, pageWidth / 2 + 60, 98);
 
     // Texto "Por completar exitosamente"
     doc.setFontSize(12);
     doc.setTextColor(107, 114, 128);
     doc.setFont('helvetica', 'normal');
-    doc.text('Por completar exitosamente el curso', pageWidth / 2, 100, {
+    doc.text('Por completar exitosamente el curso', pageWidth / 2, 110, {
       align: 'center',
     });
 
@@ -91,7 +116,7 @@ export default function DownloadCertificateButton({
     doc.setTextColor(37, 99, 235); // blue-600
     doc.setFont('helvetica', 'bold');
     const courseName = doc.splitTextToSize(certificateData.courseName, 200);
-    doc.text(courseName, pageWidth / 2, 112, { align: 'center' });
+    doc.text(courseName, pageWidth / 2, 122, { align: 'center' });
 
     // Duración del curso (si está disponible)
     if (certificateData.duration) {
@@ -111,7 +136,7 @@ export default function DownloadCertificateButton({
       doc.setFontSize(11);
       doc.setTextColor(107, 114, 128);
       doc.setFont('helvetica', 'normal');
-      doc.text(durationText, pageWidth / 2, 125, { align: 'center' });
+      doc.text(durationText, pageWidth / 2, 135, { align: 'center' });
     }
 
     // Fecha de emisión
@@ -124,7 +149,7 @@ export default function DownloadCertificateButton({
         day: 'numeric',
       })}`,
       pageWidth / 2,
-      certificateData.duration ? 135 : 130,
+      certificateData.duration ? 145 : 140,
       { align: 'center' }
     );
 
