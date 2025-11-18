@@ -1,6 +1,9 @@
 import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/supabase/auth';
 import LoginForm from './LoginForm';
+import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
 
 export default async function LoginPage({
   searchParams,
@@ -30,6 +33,15 @@ export default async function LoginPage({
         <LoginForm redirect={params.redirect} />
 
         <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+          <a
+            href="/auth/recuperar"
+            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium"
+          >
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+
+        <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
           ¿No tienes cuenta?{' '}
           <a
             href="/auth/register"
