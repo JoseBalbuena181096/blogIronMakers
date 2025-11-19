@@ -4,6 +4,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type { ContenidoBloque } from '@/types/database';
 
 interface ContentRendererProps {
@@ -44,25 +46,36 @@ export default function ContentRenderer({ content }: ContentRendererProps) {
 }
 
 function TextoBloque({ bloque }: { bloque: any }) {
-  const { texto, formato } = bloque.contenido;
+  const { texto } = bloque.contenido;
 
-  switch (formato) {
-    case 'titulo':
-      return <h2 className="text-3xl font-bold mt-8 mb-4">{texto}</h2>;
-    case 'subtitulo':
-      return <h3 className="text-2xl font-semibold mt-6 mb-3">{texto}</h3>;
-    case 'lista':
-      const items = texto.split('\n').filter((item: string) => item.trim());
-      return (
-        <ul className="list-disc list-inside space-y-2 my-4">
-          {items.map((item: string, i: number) => (
-            <li key={i}>{item.replace(/^-\s*/, '')}</li>
-          ))}
-        </ul>
-      );
-    default:
-      return <p className="my-4 leading-relaxed">{texto}</p>;
-  }
+  // Renderizar como Markdown por defecto para permitir formato enriquecido
+  return (
+    <div className="my-4 prose dark:prose-invert max-w-none">
+      <ReactMarkdown 
+        remarkPlugins={[remarkGfm]}
+        components={{
+          h1: ({node, ...props}) => <h1 className="text-4xl font-bold mt-8 mb-4" {...props} />,
+          h2: ({node, ...props}) => <h2 className="text-3xl font-bold mt-6 mb-3" {...props} />,
+          h3: ({node, ...props}) => <h3 className="text-2xl font-semibold mt-5 mb-2" {...props} />,
+          p: ({node, ...props}) => <p className="my-3 leading-relaxed" {...props} />,
+          ul: ({node, ...props}) => <ul className="list-disc list-inside space-y-2 my-4" {...props} />,
+          ol: ({node, ...props}) => <ol className="list-decimal list-inside space-y-2 my-4" {...props} />,
+          li: ({node, ...props}) => <li className="ml-4" {...props} />,
+          code: ({node, inline, ...props}: any) => 
+            inline ? (
+              <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
+            ) : (
+              <code className="block bg-gray-100 dark:bg-gray-800 p-4 rounded-lg my-4 overflow-x-auto" {...props} />
+            ),
+          blockquote: ({node, ...props}) => (
+            <blockquote className="border-l-4 border-blue-500 pl-4 italic my-4 text-gray-700 dark:text-gray-300" {...props} />
+          ),
+        }}
+      >
+        {texto}
+      </ReactMarkdown>
+    </div>
+  );
 }
 
 function CodigoBloque({ bloque }: { bloque: any }) {
