@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import type { Curso, Entrada, ContenidoBloque } from '@/types/database';
+import BlockList from '@/components/BlockEditor/BlockList';
 
 interface EntradaFormProps {
   cursos: Curso[];
@@ -30,8 +31,8 @@ export default function EntradaForm({
     orden_en_curso: entrada?.orden_en_curso || 1,
   });
 
-  const [contenidoJson, setContenidoJson] = useState(
-    entrada?.contenido ? JSON.stringify(entrada.contenido, null, 2) : '[]'
+  const [contenido, setContenido] = useState<ContenidoBloque[]>(
+    entrada?.contenido || []
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,12 +41,9 @@ export default function EntradaForm({
     setError('');
 
     try {
-      // Parsear y validar JSON
-      let contenido;
-      try {
-        contenido = JSON.parse(contenidoJson);
-      } catch (err) {
-        throw new Error('El contenido JSON no es válido');
+      // Validar contenido (opcional)
+      if (!Array.isArray(contenido)) {
+        throw new Error('El contenido debe ser una lista de bloques');
       }
 
       const supabase = createClient();
@@ -98,52 +96,46 @@ export default function EntradaForm({
   };
 
   const agregarBloque = (tipo: string) => {
-    try {
-      const bloques = JSON.parse(contenidoJson);
-      const orden = bloques.length;
+    const orden = contenido.length;
 
-      let nuevoBloque: any = {
-        id: `bloque_${Date.now()}`,
-        tipo,
-        orden,
-        contenido: {},
-      };
+    let nuevoBloque: any = {
+      id: `bloque_${Date.now()}`,
+      tipo,
+      orden,
+      contenido: {},
+    };
 
-      switch (tipo) {
-        case 'texto':
-          nuevoBloque.contenido = { texto: 'Escribe aquí...', formato: 'normal' };
-          break;
-        case 'codigo':
-          nuevoBloque.contenido = {
-            codigo: '// Código aquí',
-            lenguaje: 'python',
-            mostrarLineas: true,
-          };
-          break;
-        case 'latex':
-          nuevoBloque.contenido = { formula: 'E = mc^2', inline: false };
-          break;
-        case 'imagen':
-          nuevoBloque.contenido = {
-            url: 'https://ejemplo.com/imagen.jpg',
-            alt: 'Descripción',
-            caption: 'Pie de imagen',
-          };
-          break;
-        case 'video':
-          nuevoBloque.contenido = {
-            tipo: 'youtube',
-            videoId: 'VIDEO_ID',
-            url: 'https://youtube.com/watch?v=VIDEO_ID',
-          };
-          break;
-      }
-
-      bloques.push(nuevoBloque);
-      setContenidoJson(JSON.stringify(bloques, null, 2));
-    } catch (err) {
-      alert('Error al agregar bloque. Verifica que el JSON sea válido.');
+    switch (tipo) {
+      case 'texto':
+        nuevoBloque.contenido = { texto: '', formato: 'normal' };
+        break;
+      case 'codigo':
+        nuevoBloque.contenido = {
+          codigo: '',
+          lenguaje: 'python',
+          mostrarLineas: true,
+        };
+        break;
+      case 'latex':
+        nuevoBloque.contenido = { formula: '', inline: false };
+        break;
+      case 'imagen':
+        nuevoBloque.contenido = {
+          url: '',
+          alt: '',
+          caption: '',
+        };
+        break;
+      case 'video':
+        nuevoBloque.contenido = {
+          tipo: 'youtube',
+          videoId: '',
+          url: '',
+        };
+        break;
     }
+
+    setContenido([...contenido, nuevoBloque]);
   };
 
   return (
@@ -316,18 +308,9 @@ export default function EntradaForm({
         {/* Columna Derecha: Editor JSON */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Contenido (JSON)
+            Contenido de la Lección
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Edita el contenido en formato JSON. Usa los botones de la izquierda para agregar
-            bloques automáticamente.
-          </p>
-          <textarea
-            value={contenidoJson}
-            onChange={(e) => setContenidoJson(e.target.value)}
-            className="w-full h-[600px] px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-blue-500"
-            placeholder="[]"
-          />
+          <BlockList blocks={contenido} onChange={setContenido} />
         </div>
       </div>
     </form>

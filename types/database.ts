@@ -116,7 +116,7 @@ export interface BloqueTexto extends ContenidoBloque {
   tipo: 'texto';
   contenido: {
     texto: string;
-    formato?: 'normal' | 'titulo' | 'subtitulo' | 'lista';
+    formato?: 'normal' | 'titulo' | 'subtitulo' | 'lista' | 'markdown';
   };
 }
 

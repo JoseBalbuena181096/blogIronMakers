@@ -1,210 +1,194 @@
 # 🎓 Blog Educativo - Sistema de Cursos Online
 
-Sistema completo de gestión de cursos educativos con autenticación, tracking de progreso, generación automática de certificados y panel de administración.
+Sistema completo de gestión de cursos educativos con autenticación, tracking de progreso, generación automática de certificados y panel de administración. Este proyecto está diseñado para ofrecer una experiencia de aprendizaje moderna y fluida, tanto para estudiantes como para administradores.
 
 ## 📋 Características Principales
 
 ### Frontend Público
-- 🏠 **Landing Page Dinámica** - Contenido personalizable desde base de datos
-- 📚 **Catálogo de Cursos** - Navegación pública de todos los cursos disponibles
-- 📖 **Visualizador de Lecciones** - Renderizado de contenido rico:
-  - Bloques de texto con formatos
-  - Código con syntax highlighting (Python, JavaScript, TypeScript, etc.)
-  - Fórmulas matemáticas con LaTeX
-  - Imágenes con caption
-  - Videos embebidos (YouTube, Vimeo)
-- 📊 **Tracking de Progreso** - Sistema de seguimiento por lección
-- 🏆 **Certificados Automáticos** - Generación al completar 100% del curso
-- 👤 **Panel de Usuario** - Vista de cursos inscritos, progreso y certificados
+- 🏠 **Landing Page Dinámica**: Contenido totalmente personalizable desde la base de datos (secciones, equipo, proyectos).
+- 📚 **Catálogo de Cursos**: Navegación intuitiva de cursos disponibles con filtrado y búsqueda.
+- 📖 **Visualizador de Lecciones**: Renderizado de contenido rico soportando:
+  - Bloques de texto con formato enriquecido.
+  - **Código**: Syntax highlighting para múltiples lenguajes (Python, JS, TS, etc.).
+  - **Matemáticas**: Renderizado de fórmulas LaTeX con KaTeX.
+  - **Multimedia**: Imágenes y videos (YouTube/Vimeo) embebidos.
+- 📊 **Tracking de Progreso**: Sistema granular de seguimiento por lección.
+- 🏆 **Certificados Automáticos**: Generación de PDF verificable al completar el 100% del curso.
+- 👤 **Panel de Usuario**: Dashboard personal con cursos inscritos, progreso y certificados obtenidos.
 
 ### Panel de Administración
-- 📈 **Dashboard** - Estadísticas en tiempo real (usuarios, cursos, inscripciones)
-- ✏️ **Gestión de Cursos** - CRUD completo (crear, editar, eliminar, ordenar)
-- 📝 **Gestión de Lecciones** - Editor de contenido con bloques JSONB
-- 👥 **Actividad Reciente** - Monitoreo de inscripciones y progreso
+- 📈 **Dashboard**: Métricas en tiempo real de usuarios, inscripciones y cursos.
+- ✏️ **Gestión de Cursos**: CRUD completo para cursos y lecciones.
+- 📝 **Editor de Contenido**: Editor basado en bloques JSONB para crear lecciones interactivas.
+- 👥 **Gestión de Usuarios**: Visualización de usuarios registrados.
 
 ### Seguridad y Autenticación
-- 🔐 **Autenticación con Supabase** - Login/registro seguro
-- 🛡️ **Row Level Security (RLS)** - Políticas de acceso por tabla
-- 👮 **Roles de Usuario** - Sistema admin/user
-- 🚪 **Middleware de Protección** - Rutas protegidas por rol
-
-## 🚀 Tecnologías
-
-- **Framework:** Next.js 16 con App Router y Turbopack
-- **Lenguaje:** TypeScript 5.9
-- **Estilos:** Tailwind CSS 3.x
-- **Base de Datos:** Supabase (PostgreSQL)
-- **Autenticación:** @supabase/ssr v2.81
-- **Renderizado:**
-  - `react-syntax-highlighter` - Highlighting de código
-  - `katex` y `react-katex` - Fórmulas matemáticas
-  - `@react-pdf/renderer` - Generación de certificados PDF
-
-## 📦 Instalación
-
-### Prerrequisitos
-- Node.js 18+ y npm
-- Cuenta de Supabase (gratuita)
-
-### 1. Clonar el repositorio
-```bash
-git clone <url-repositorio>
-cd blog
-```
-
-### 2. Instalar dependencias
-```bash
-npm install
-```
-
-### 3. Configurar variables de entorno
-
-Crear archivo `.env.local`:
-
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
-
-# Admin
-NEXT_PUBLIC_ADMIN_EMAIL=tu@email.com
-```
-
-### 4. Configurar Base de Datos
-
-Ejecutar los scripts SQL en Supabase en este orden:
-
-1. `supabase/schema.sql` - Crear 9 tablas
-2. `supabase/policies.sql` - Configurar RLS
-3. `supabase/triggers.sql` - Funciones automáticas
-4. `supabase/seed.sql` - Datos de prueba (opcional)
-5. `supabase/storage-policies.sql` - Políticas de Storage
-
-O usar el script automatizado:
-```bash
-chmod +x scripts/setup-database.sh
-./scripts/setup-database.sh
-```
-
-### 5. Configurar Storage en Supabase
-
-Crear los siguientes buckets públicos:
-- `imagenes` - Para portadas e imágenes
-- `certificados` - Para PDFs
-
-### 6. Iniciar servidor
-```bash
-npm run dev
-```
-
-Abrir [http://localhost:3000](http://localhost:3000)
-
-## 📁 Estructura
-
-```
-blog/
-├── app/
-│   ├── auth/              # Login/Registro
-│   ├── admin/            # Panel admin
-│   ├── cursos/           # Páginas públicas
-│   ├── mis-cursos/       # Panel usuario
-│   └── page.tsx          # Landing
-├── components/           # Componentes React
-├── lib/supabase/        # Clientes Supabase
-├── supabase/            # Scripts SQL
-├── types/               # TypeScript types
-└── middleware.ts        # Protección rutas
-```
-
-## 🗄️ Base de Datos
-
-### 9 Tablas
-- profiles, cursos, entradas, inscripciones
-- progreso_lecciones, certificados
-- contenido_landing, integrantes_equipo, proyectos_destacados
-
-### Triggers Automáticos
-- Crea perfil al registrarse
-- Genera certificado al 100%
-
-## 🎨 Formato de Contenido
-
-Ejemplo de lección con bloques JSONB:
-
-```json
-[
-  {
-    "id": "bloque_1",
-    "tipo": "texto",
-    "orden": 0,
-    "contenido": { "texto": "Introducción", "formato": "titulo" }
-  },
-  {
-    "id": "bloque_2",
-    "tipo": "codigo",
-    "orden": 1,
-    "contenido": {
-      "codigo": "def hola():\n    print('Hola')",
-      "lenguaje": "python",
-      "mostrarLineas": true
-    }
-  },
-  {
-    "id": "bloque_3",
-    "tipo": "latex",
-    "orden": 2,
-    "contenido": { "formula": "E = mc^2", "inline": false }
-  }
-]
-```
-
-**Tipos soportados:** texto, codigo, latex, imagen, video, markdown
-
-## 👤 Uso
-
-### Estudiantes
-1. Registrarse en `/auth/register`
-2. Explorar cursos en `/cursos`
-3. Inscribirse y estudiar
-4. Progreso automático
-5. Certificado al finalizar
-
-### Administradores
-1. Panel en `/admin`
-2. Crear cursos en `/admin/cursos/nuevo`
-3. Crear lecciones en `/admin/entradas/nuevo`
-4. Usar editor JSON o botones de bloques
-
-## 🚀 Deployment en Vercel
-
-1. Conectar repo en [vercel.com](https://vercel.com)
-2. Configurar variables:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `NEXT_PUBLIC_ADMIN_EMAIL`
-3. Deploy automático
-
-## 📝 Scripts
-
-```bash
-npm run dev    # Desarrollo
-npm run build  # Build producción
-npm run start  # Servidor producción
-npm run lint   # ESLint
-```
-
-## 🔧 Configuración
-
-- Primer usuario con email admin → automáticamente admin
-- Triggers crean perfiles y certificados
-- RLS protege todas las tablas
-- Storage público lectura, autenticado escritura
-
-## 📄 Licencia
-
-MIT License
+- 🔐 **Supabase Auth**: Sistema robusto de autenticación (Email/Password).
+- 🛡️ **Row Level Security (RLS)**: Protección de datos a nivel de fila en PostgreSQL.
+- 👮 **Roles**: Sistema de roles (admin/user) gestionado en la tabla `profiles`.
+- 🚪 **Middleware**: Protección de rutas en Next.js basado en roles.
 
 ---
 
-**¡Listo para enseñar! 🎓✨**
+## 🚀 Tecnologías
+
+### Core
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Lenguaje**: [TypeScript 5.9](https://www.typescriptlang.org/)
+- **Estilos**: [Tailwind CSS 3](https://tailwindcss.com/)
+
+### Backend & Datos
+- **Base de Datos**: [Supabase](https://supabase.com/) (PostgreSQL)
+- **Autenticación**: `@supabase/ssr` & `@supabase/supabase-js`
+- **Almacenamiento**: Supabase Storage (para imágenes y certificados)
+
+### Renderizado & Utilidades
+- **PDF**: `@react-pdf/renderer` para generación de certificados.
+- **Código**: `react-syntax-highlighter`.
+- **Matemáticas**: `katex` y `react-katex`.
+- **Markdown**: `react-markdown` y `remark-gfm`.
+
+---
+
+## 🗄️ Base de Datos y Schema
+
+El proyecto utiliza una base de datos PostgreSQL alojada en Supabase. El esquema está diseñado para ser escalable y seguro.
+
+### Tablas Principales
+
+1.  **`profiles`**: Extensión de la tabla `auth.users`. Almacena información pública del usuario (nombre, avatar, rol).
+2.  **`cursos`**: Catálogo de cursos (título, slug, descripción, portada).
+3.  **`entradas`** (Lecciones): Contenido de las lecciones. Relacionada con `cursos`. Usa un campo `JSONB` para el contenido modular.
+4.  **`inscripciones`**: Tabla pivote que registra qué usuarios están inscritos en qué cursos y su estado (inscrito/completado).
+5.  **`progreso_lecciones`**: Tracking granular. Registra si un usuario ha completado una lección específica.
+6.  **`certificados`**: Almacena los certificados emitidos. Contiene el código de verificación único y la URL del PDF.
+
+### Tablas de Contenido (Landing Page)
+7.  **`contenido_landing`**: Textos dinámicos de la home.
+8.  **`integrantes_equipo`**: Miembros del equipo mostrados en "Quiénes somos".
+9.  **`proyectos_destacados`**: Portfolio de proyectos.
+
+### Diagrama de Relaciones (Simplificado)
+```mermaid
+erDiagram
+    profiles ||--o{ inscripciones : "tiene"
+    profiles ||--o{ progreso_lecciones : "registra"
+    profiles ||--o{ certificados : "gana"
+    cursos ||--o{ entradas : "contiene"
+    cursos ||--o{ inscripciones : "tiene"
+    cursos ||--o{ certificados : "emite"
+    entradas ||--o{ progreso_lecciones : "tiene"
+```
+
+---
+
+## ⚡ Supabase y Migraciones
+
+El proyecto mantiene todo el esquema de base de datos y funciones en el directorio `/supabase`.
+
+### Estructura de Archivos
+- `supabase/schema.sql`: Definición base de todas las tablas.
+- `supabase/policies.sql`: Políticas de seguridad RLS (Row Level Security).
+- `supabase/triggers.sql`: Funciones automáticas (ej: crear perfil al registrarse, verificar completitud de curso).
+- `supabase/seed.sql`: Datos de prueba iniciales.
+- `supabase/migrations/`: Scripts de migración para cambios incrementales.
+
+### Flujo de Migraciones
+Para aplicar cambios a la base de datos, recomendamos usar el SQL Editor de Supabase o la CLI.
+
+#### 1. Configuración Inicial
+Si estás levantando el proyecto desde cero, ejecuta los scripts en este orden en el SQL Editor de Supabase:
+1.  `schema.sql`
+2.  `policies.sql`
+3.  `triggers.sql`
+4.  `storage-policies.sql`
+
+#### 2. Aplicar Migraciones
+Las migraciones se encuentran en `supabase/migrations/`. Por ejemplo, si necesitas agregar campos a `proyectos_destacados`, busca el archivo `.sql` correspondiente y ejecuta su contenido.
+
+Ejemplo de migración (`add_proyectos_fields.sql`):
+```sql
+ALTER TABLE public.proyectos_destacados 
+ADD COLUMN IF NOT EXISTS tecnologias TEXT[] DEFAULT '{}';
+```
+
+### Triggers Importantes
+- **`handle_new_user`**: Se ejecuta automáticamente cuando un usuario se registra en Supabase Auth. Crea una entrada correspondiente en la tabla `public.profiles`.
+- **`check_curso_completion`**: Se ejecuta cada vez que se actualiza `progreso_lecciones`. Verifica si el usuario ha completado todas las lecciones de un curso. Si es así:
+    1.  Marca la inscripción como 'completado'.
+    2.  Genera un registro en la tabla `certificados` con un código único.
+
+---
+
+## 📦 Instalación y Desarrollo
+
+### Prerrequisitos
+- Node.js 18+
+- Cuenta en Supabase
+
+### Pasos
+
+1.  **Clonar el repositorio**
+    ```bash
+    git clone <url-del-repo>
+    cd blog
+    ```
+
+2.  **Instalar dependencias**
+    ```bash
+    npm install
+    ```
+
+3.  **Configurar Variables de Entorno**
+    Crea un archivo `.env.local` basado en `.env.example`:
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+    NEXT_PUBLIC_ADMIN_EMAIL=admin@ejemplo.com
+    ```
+
+4.  **Configurar Base de Datos**
+    Ejecuta los scripts SQL mencionados en la sección "Supabase y Migraciones" en tu dashboard de Supabase.
+
+5.  **Configurar Storage**
+    Crea dos buckets públicos en Supabase Storage:
+    - `imagenes`: Para portadas de cursos y assets.
+    - `certificados`: Para almacenar los PDFs generados.
+
+6.  **Iniciar Servidor de Desarrollo**
+    ```bash
+    npm run dev
+    ```
+    Visita `http://localhost:3000`.
+
+---
+
+## 📂 Estructura del Proyecto
+
+```
+blog/
+├── app/                    # Next.js App Router
+│   ├── (public)/          # Rutas públicas (Landing, Cursos)
+│   ├── admin/             # Rutas protegidas de administración
+│   ├── auth/              # Páginas de Login/Registro
+│   ├── mis-cursos/        # Área privada del estudiante
+│   ├── api/               # API Routes (Generación PDF, etc.)
+│   └── layout.tsx         # Layout raíz
+├── components/            # Componentes React reutilizables
+│   ├── ui/                # Componentes base (Botones, Inputs)
+│   ├── cursos/            # Componentes específicos de cursos
+│   └── admin/             # Componentes del panel admin
+├── lib/                   # Utilidades y configuración
+│   ├── supabase/          # Clientes de Supabase (Client/Server)
+│   └── utils.ts           # Helpers generales
+├── supabase/              # SQL y Migraciones
+│   ├── migrations/        # Scripts de cambios incrementales
+│   └── ...                # Scripts base (schema, policies, etc.)
+└── public/                # Assets estáticos
+```
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT.
