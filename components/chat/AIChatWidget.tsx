@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/client';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -18,8 +18,9 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -29,8 +30,36 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
         scrollToBottom();
     }, [messages]);
 
+    // Check authentication status on mount and when chat opens
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setIsAuthenticated(!!session);
+        };
+
+        checkAuth();
+
+        // Subscribe to auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setIsAuthenticated(!!session);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [supabase.auth]);
+
     const sendMessage = async () => {
         if (!input.trim() || isTyping) return;
+
+        // Check authentication before sending
+        if (isAuthenticated === false) {
+            setMessages((prev) => [
+                ...prev,
+                { role: 'assistant', content: 'Por favor, inicia sesión para usar el chat.' },
+            ]);
+            return;
+        }
 
         const userMessage: Message = { role: 'user', content: input };
         setMessages((prev) => [...prev, userMessage]);
@@ -45,6 +74,7 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                     ...prev,
                     { role: 'assistant', content: 'Por favor, inicia sesión para usar el chat.' },
                 ]);
+                setIsAuthenticated(false);
                 setIsTyping(false);
                 return;
             }
@@ -122,7 +152,16 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 && (
                     <div className="text-center text-gray-500 dark:text-gray-400 text-sm py-8">
-                        ¡Hola! Soy tu asistente de IA. Pregúntame lo que quieras sobre esta clase.
+                        {isAuthenticated === false ? (
+                            <div>
+                                <p className="mb-2">Por favor, inicia sesión para usar el chat.</p>
+                                <a href="/auth/login" className="text-blue-600 hover:underline">
+                                    Ir a login
+                                </a>
+                            </div>
+                        ) : (
+                            '¡Hola! Soy tu asistente de IA. Pregúntame lo que quieras sobre esta clase.'
+                        )}
                     </div>
                 )}
                 {messages.map((message, index) => (
@@ -155,6 +194,11 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
 
             {/* Input */}
             <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                {isAuthenticated === false && (
+                    <div className="mb-2 text-xs text-red-600 dark:text-red-400 text-center">
+                        Debes iniciar sesión para enviar mensajes
+                    </div>
+                )}
                 <div className="flex gap-2">
                     <input
                         type="text"
@@ -162,12 +206,12 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="Escribe tu pregunta..."
-                        disabled={isTyping}
+                        disabled={isTyping || isAuthenticated === false}
                         className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white disabled:opacity-50"
                     />
                     <button
                         onClick={sendMessage}
-                        disabled={!input.trim() || isTyping}
+                        disabled={!input.trim() || isTyping || isAuthenticated === false}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Enviar mensaje"
                     >
