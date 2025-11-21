@@ -86,19 +86,40 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                 },
             });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error en chat-proxy:', error);
+                throw error;
+            }
+
+            if (!data || !data.response) {
+                console.error('Respuesta inválida del servidor:', data);
+                throw new Error('Respuesta inválida del servidor');
+            }
 
             setMessages((prev) => [
                 ...prev,
                 { role: 'assistant', content: data.response },
             ]);
         } catch (error: any) {
-            console.error('Error:', error);
+            console.error('Error completo:', error);
+            
+            let errorMessage = 'Lo siento, hubo un error al procesar tu mensaje.';
+            
+            // Mensajes de error más específicos
+            if (error.message?.includes('FunctionsRelayError')) {
+                errorMessage = 'El servicio de chat no está disponible en este momento. Por favor, contacta al administrador.';
+            } else if (error.message?.includes('FunctionsFetchError')) {
+                errorMessage = 'No se pudo conectar con el servicio de chat. Verifica tu conexión a internet.';
+            } else if (error.message?.includes('Unauthorized')) {
+                errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+                setIsAuthenticated(false);
+            }
+            
             setMessages((prev) => [
                 ...prev,
                 {
                     role: 'assistant',
-                    content: 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.',
+                    content: errorMessage,
                 },
             ]);
         } finally {

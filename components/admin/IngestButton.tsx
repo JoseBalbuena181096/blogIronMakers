@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 interface IngestButtonProps {
     entradaId: string;
@@ -12,7 +12,27 @@ export default function IngestButton({ entradaId, onSuccess }: IngestButtonProps
     const [isLoading, setIsLoading] = useState(false);
     const [isProcessed, setIsProcessed] = useState(false);
     const [message, setMessage] = useState('');
-    const supabase = createClientComponentClient();
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const supabase = createClient();
+
+    // Check authentication status on mount
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setIsAuthenticated(!!session);
+        };
+
+        checkAuth();
+
+        // Subscribe to auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setIsAuthenticated(!!session);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [supabase.auth]);
 
     const handleIngest = async () => {
         setIsLoading(true);
@@ -23,6 +43,7 @@ export default function IngestButton({ entradaId, onSuccess }: IngestButtonProps
 
             if (!session) {
                 setMessage('Debes iniciar sesión');
+                setIsAuthenticated(false);
                 setIsLoading(false);
                 return;
             }
@@ -31,7 +52,10 @@ export default function IngestButton({ entradaId, onSuccess }: IngestButtonProps
                 body: { entrada_id: entradaId },
             });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error en ingest-proxy:', error);
+                throw error;
+            }
 
             if (data.success) {
                 setMessage(data.message || 'Clase procesada correctamente');
@@ -41,8 +65,22 @@ export default function IngestButton({ entradaId, onSuccess }: IngestButtonProps
                 setMessage(data.message || 'Error al procesar');
             }
         } catch (error: any) {
-            console.error('Error:', error);
-            setMessage(error.message || 'Error al procesar la clase');
+            console.error('Error completo:', error);
+            
+            let errorMessage = 'Error al procesar la clase';
+            
+            if (error.message?.includes('FunctionsRelayError')) {
+                errorMessage = 'El servicio de procesamiento no está disponible. Contacta al administrador.';
+            } else if (error.message?.includes('FunctionsFetchError')) {
+                errorMessage = 'No se pudo conectar con el servicio. Verifica tu conexión.';
+            } else if (error.message?.includes('Unauthorized')) {
+                errorMessage = 'Tu sesión ha expirado. Inicia sesión nuevamente.';
+                setIsAuthenticated(false);
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            setMessage(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -63,8 +101,9 @@ export default function IngestButton({ entradaId, onSuccess }: IngestButtonProps
         <div className="flex flex-col items-end gap-2">
             <button
                 onClick={handleIngest}
-                disabled={isLoading}
+                disabled={isLoading || isAuthenticated === false}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                title={isAuthenticated === false ? 'Debes iniciar sesión' : 'Procesar clase con IA'}
             >
                 {isLoading ? (
                     <>
