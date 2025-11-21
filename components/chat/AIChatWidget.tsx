@@ -66,12 +66,16 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
         setInput('');
         setIsTyping(true);
 
+        // Add placeholder for assistant message
+        const assistantMessageIndex = messages.length + 1;
+        setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
+
         try {
             const { data: { session } } = await supabase.auth.getSession();
 
             if (!session) {
                 setMessages((prev) => [
-                    ...prev,
+                    ...prev.slice(0, -1),
                     { role: 'assistant', content: 'Por favor, inicia sesión para usar el chat.' },
                 ]);
                 setIsAuthenticated(false);
@@ -79,49 +83,105 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                 return;
             }
 
-            const { data, error } = await supabase.functions.invoke('chat-proxy', {
-                body: {
-                    query: userMessage.content,
-                    entrada_id: entradaId,
-                },
-            });
+            // Use fetch with streaming
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat-proxy`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+                    },
+                    body: JSON.stringify({
+                        query: userMessage.content,
+                        entrada_id: entradaId,
+                    }),
+                }
+            );
 
-            if (error) {
-                console.error('Error en chat-proxy:', error);
-                throw error;
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            if (!data || !data.response) {
-                console.error('Respuesta inválida del servidor:', data);
-                throw new Error('Respuesta inválida del servidor');
+            const reader = response.body?.getReader();
+            const decoder = new TextDecoder();
+
+            if (!reader) {
+                throw new Error('No reader available');
             }
 
-            setMessages((prev) => [
-                ...prev,
-                { role: 'assistant', content: data.response },
-            ]);
+            let accumulatedContent = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const jsonData = JSON.parse(line.slice(6));
+                            
+                            if (jsonData.error) {
+                                throw new Error(jsonData.error);
+                            }
+                            
+                            if (jsonData.content) {
+                                accumulatedContent = jsonData.content;
+                                
+                                // Update the last message with accumulated content
+                                setMessages((prev) => {
+                                    const newMessages = [...prev];
+                                    newMessages[newMessages.length - 1] = {
+                                        role: 'assistant',
+                                        content: accumulatedContent,
+                                    };
+                                    return newMessages;
+                                });
+                            }
+                            
+                            if (jsonData.done) {
+                                break;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing SSE:', e);
+                        }
+                    }
+                }
+            }
+
+            // If no content was received, show error
+            if (!accumulatedContent) {
+                throw new Error('No se recibió respuesta del servidor');
+            }
+
         } catch (error: any) {
             console.error('Error completo:', error);
             
             let errorMessage = 'Lo siento, hubo un error al procesar tu mensaje.';
             
             // Mensajes de error más específicos
-            if (error.message?.includes('FunctionsRelayError')) {
-                errorMessage = 'El servicio de chat no está disponible en este momento. Por favor, contacta al administrador.';
-            } else if (error.message?.includes('FunctionsFetchError')) {
+            if (error.message?.includes('Failed to fetch')) {
                 errorMessage = 'No se pudo conectar con el servicio de chat. Verifica tu conexión a internet.';
             } else if (error.message?.includes('Unauthorized')) {
                 errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
                 setIsAuthenticated(false);
+            } else if (error.message) {
+                errorMessage = error.message;
             }
             
-            setMessages((prev) => [
-                ...prev,
-                {
+            setMessages((prev) => {
+                const newMessages = [...prev];
+                newMessages[newMessages.length - 1] = {
                     role: 'assistant',
                     content: errorMessage,
-                },
-            ]);
+                };
+                return newMessages;
+            });
         } finally {
             setIsTyping(false);
         }
