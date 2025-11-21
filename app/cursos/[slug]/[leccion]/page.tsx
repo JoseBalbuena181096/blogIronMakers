@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { Curso, Entrada, ProgresoLeccion } from '@/types/database';
 import ContentRenderer from './ContentRenderer';
 import CompleteButton from './CompleteButton';
+import AIChatWidget from '@/components/chat/AIChatWidget';
 
 export default async function LeccionPage({
   params,
@@ -179,6 +180,9 @@ export default async function LeccionPage({
           </div>
         </div>
       </main>
+
+      {/* AI Chat Widget - Flotante en la esquina */}
+      <AIChatWidget entradaId={entrada.id} />
     </>
   );
 }
