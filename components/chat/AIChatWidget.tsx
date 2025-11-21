@@ -83,15 +83,30 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                 return;
             }
 
+            // Get Supabase URL and key from environment
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+            const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+            console.log('Supabase URL disponible:', !!supabaseUrl);
+            console.log('Supabase Key disponible:', !!supabaseAnonKey);
+            console.log('Session disponible:', !!session);
+
+            if (!supabaseUrl || !supabaseAnonKey) {
+                throw new Error('Configuración de Supabase no encontrada');
+            }
+
+            const fetchUrl = `${supabaseUrl}/functions/v1/chat-proxy`;
+            console.log('Enviando request a:', fetchUrl);
+
             // Use fetch with streaming
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat-proxy`,
+                fetchUrl,
                 {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${session.access_token}`,
-                        'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+                        'apikey': supabaseAnonKey,
                     },
                     body: JSON.stringify({
                         query: userMessage.content,
@@ -99,6 +114,9 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                     }),
                 }
             );
+
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -161,15 +179,22 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
 
         } catch (error: any) {
             console.error('Error completo:', error);
+            console.error('Error stack:', error.stack);
             
             let errorMessage = 'Lo siento, hubo un error al procesar tu mensaje.';
             
             // Mensajes de error más específicos
-            if (error.message?.includes('Failed to fetch')) {
-                errorMessage = 'No se pudo conectar con el servicio de chat. Verifica tu conexión a internet.';
-            } else if (error.message?.includes('Unauthorized')) {
+            if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+                errorMessage = 'Error de conexión. Verifica:\n1. Tu conexión a internet\n2. Que Supabase esté funcionando\n3. Revisa la consola del navegador (F12) para más detalles';
+            } else if (error.message?.includes('Unauthorized') || error.message?.includes('401')) {
                 errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
                 setIsAuthenticated(false);
+            } else if (error.message?.includes('404')) {
+                errorMessage = 'La función Edge de chat no está disponible. Contacta al administrador.';
+            } else if (error.message?.includes('500')) {
+                errorMessage = 'Error en el servidor. Por favor, intenta de nuevo más tarde.';
+            } else if (error.message?.includes('Configuración de Supabase')) {
+                errorMessage = 'Error de configuración. Las variables de entorno no están disponibles.';
             } else if (error.message) {
                 errorMessage = error.message;
             }
