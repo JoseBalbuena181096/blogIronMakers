@@ -66,16 +66,12 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
         setInput('');
         setIsTyping(true);
 
-        // Add placeholder for assistant message
-        const assistantMessageIndex = messages.length + 1;
-        setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
-
         try {
             const { data: { session } } = await supabase.auth.getSession();
 
             if (!session) {
                 setMessages((prev) => [
-                    ...prev.slice(0, -1),
+                    ...prev,
                     { role: 'assistant', content: 'Por favor, inicia sesión para usar el chat.' },
                 ]);
                 setIsAuthenticated(false);
@@ -83,130 +79,49 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                 return;
             }
 
-            // Get Supabase URL and key from environment
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-            const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+            const { data, error } = await supabase.functions.invoke('chat-proxy', {
+                body: {
+                    query: userMessage.content,
+                    entrada_id: entradaId,
+                },
+            });
 
-            console.log('Supabase URL disponible:', !!supabaseUrl);
-            console.log('Supabase Key disponible:', !!supabaseAnonKey);
-            console.log('Session disponible:', !!session);
-
-            if (!supabaseUrl || !supabaseAnonKey) {
-                throw new Error('Configuración de Supabase no encontrada');
+            if (error) {
+                console.error('Error en chat-proxy:', error);
+                throw error;
             }
 
-            const fetchUrl = `${supabaseUrl}/functions/v1/chat-proxy`;
-            console.log('Enviando request a:', fetchUrl);
-
-            // Use fetch with streaming
-            const response = await fetch(
-                fetchUrl,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.access_token}`,
-                        'apikey': supabaseAnonKey,
-                    },
-                    body: JSON.stringify({
-                        query: userMessage.content,
-                        entrada_id: entradaId,
-                    }),
-                }
-            );
-
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (!data || !data.response) {
+                console.error('Respuesta inválida del servidor:', data);
+                throw new Error('Respuesta inválida del servidor');
             }
 
-            const reader = response.body?.getReader();
-            const decoder = new TextDecoder();
-
-            if (!reader) {
-                throw new Error('No reader available');
-            }
-
-            let accumulatedContent = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                
-                if (done) break;
-
-                const chunk = decoder.decode(value);
-                const lines = chunk.split('\n');
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        try {
-                            const jsonData = JSON.parse(line.slice(6));
-                            
-                            if (jsonData.error) {
-                                throw new Error(jsonData.error);
-                            }
-                            
-                            if (jsonData.content) {
-                                accumulatedContent = jsonData.content;
-                                
-                                // Update the last message with accumulated content
-                                setMessages((prev) => {
-                                    const newMessages = [...prev];
-                                    newMessages[newMessages.length - 1] = {
-                                        role: 'assistant',
-                                        content: accumulatedContent,
-                                    };
-                                    return newMessages;
-                                });
-                            }
-                            
-                            if (jsonData.done) {
-                                break;
-                            }
-                        } catch (e) {
-                            console.error('Error parsing SSE:', e);
-                        }
-                    }
-                }
-            }
-
-            // If no content was received, show error
-            if (!accumulatedContent) {
-                throw new Error('No se recibió respuesta del servidor');
-            }
-
+            setMessages((prev) => [
+                ...prev,
+                { role: 'assistant', content: data.response },
+            ]);
         } catch (error: any) {
             console.error('Error completo:', error);
-            console.error('Error stack:', error.stack);
             
             let errorMessage = 'Lo siento, hubo un error al procesar tu mensaje.';
             
             // Mensajes de error más específicos
-            if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
-                errorMessage = 'Error de conexión. Verifica:\n1. Tu conexión a internet\n2. Que Supabase esté funcionando\n3. Revisa la consola del navegador (F12) para más detalles';
-            } else if (error.message?.includes('Unauthorized') || error.message?.includes('401')) {
+            if (error.message?.includes('FunctionsRelayError')) {
+                errorMessage = 'El servicio de chat no está disponible en este momento. Por favor, contacta al administrador.';
+            } else if (error.message?.includes('FunctionsFetchError')) {
+                errorMessage = 'No se pudo conectar con el servicio de chat. Verifica tu conexión a internet.';
+            } else if (error.message?.includes('Unauthorized')) {
                 errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
                 setIsAuthenticated(false);
-            } else if (error.message?.includes('404')) {
-                errorMessage = 'La función Edge de chat no está disponible. Contacta al administrador.';
-            } else if (error.message?.includes('500')) {
-                errorMessage = 'Error en el servidor. Por favor, intenta de nuevo más tarde.';
-            } else if (error.message?.includes('Configuración de Supabase')) {
-                errorMessage = 'Error de configuración. Las variables de entorno no están disponibles.';
-            } else if (error.message) {
-                errorMessage = error.message;
             }
             
-            setMessages((prev) => {
-                const newMessages = [...prev];
-                newMessages[newMessages.length - 1] = {
+            setMessages((prev) => [
+                ...prev,
+                {
                     role: 'assistant',
                     content: errorMessage,
-                };
-                return newMessages;
-            });
+                },
+            ]);
         } finally {
             setIsTyping(false);
         }
