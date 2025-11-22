@@ -21,6 +21,16 @@ CREATE POLICY "Admins can update inscripciones"
     )
   );
 
+-- Add DELETE policy for inscripciones (needed for unenrollment)
+CREATE POLICY "Admins can delete inscripciones"
+  ON public.inscripciones FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE id = auth.uid() AND rol = 'admin'
+    )
+  );
+
 -- Add DELETE policy for quiz_intentos
 CREATE POLICY "Admins can delete quiz attempts"
   ON public.quiz_intentos FOR DELETE
