@@ -140,6 +140,28 @@ export default function UserProgress({ userId }: { userId: string }) {
         ? intentosQuiz.filter(q => q.entradas?.curso_id === selectedCursoFilter)
         : intentosQuiz;
 
+    // Group quiz attempts by lesson (entrada_id) and get only the last attempt with total count
+    const intentosAgrupados = intentosFiltrados.reduce((acc: any, intento) => {
+        const entradaId = intento.entrada_id;
+        if (!acc[entradaId]) {
+            acc[entradaId] = {
+                ultimoIntento: intento,
+                totalIntentos: 1
+            };
+        } else {
+            acc[entradaId].totalIntentos += 1;
+            // Since intentosQuiz is already sorted by fecha_intento desc, 
+            // we keep the first one we saw (which is the most recent)
+        }
+        return acc;
+    }, {});
+
+    // Convert to array for rendering
+    const intentosParaMostrar = Object.values(intentosAgrupados).map((grupo: any) => ({
+        ...grupo.ultimoIntento,
+        totalIntentos: grupo.totalIntentos
+    }));
+
     return (
         <div className="space-y-8">
             {/* Progreso de Cursos */}
@@ -214,7 +236,7 @@ export default function UserProgress({ userId }: { userId: string }) {
                     </div>
                 )}
 
-                {intentosFiltrados.length === 0 ? (
+                {intentosParaMostrar.length === 0 ? (
                     <p className="text-gray-500 italic">No hay intentos de quiz registrados.</p>
                 ) : (
                     <div className="overflow-x-auto">
@@ -224,11 +246,12 @@ export default function UserProgress({ userId }: { userId: string }) {
                                     <th className="pb-2">Curso</th>
                                     <th className="pb-2">Lección</th>
                                     <th className="pb-2">Puntuación</th>
+                                    <th className="pb-2">Intentos Totales</th>
                                     <th className="pb-2">Fecha</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {intentosFiltrados.map((intento) => (
+                                {intentosParaMostrar.map((intento: any) => (
                                     <tr key={intento.id} className="border-b dark:border-gray-700 last:border-0">
                                         <td className="py-3 text-gray-700 dark:text-gray-300">
                                             {intento.entradas?.cursos?.titulo || 'N/A'}
@@ -239,6 +262,11 @@ export default function UserProgress({ userId }: { userId: string }) {
                                         <td className="py-3">
                                             <span className={`font-bold ${intento.puntuacion >= 70 ? 'text-green-600' : 'text-red-600'}`}>
                                                 {intento.puntuacion}/100
+                                            </span>
+                                        </td>
+                                        <td className="py-3">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                {intento.totalIntentos} {intento.totalIntentos === 1 ? 'intento' : 'intentos'}
                                             </span>
                                         </td>
                                         <td className="py-3 text-gray-500">
