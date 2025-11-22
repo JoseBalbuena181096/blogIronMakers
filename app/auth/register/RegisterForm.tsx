@@ -8,6 +8,7 @@ export default function RegisterForm() {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -20,6 +21,12 @@ export default function RegisterForm() {
 
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres');
+      setLoading(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Las contraseñas no coinciden');
       setLoading(false);
       return;
     }
@@ -43,7 +50,7 @@ export default function RegisterForm() {
     }
 
     setSuccess(true);
-    
+
     // Auto-login después de registro
     setTimeout(() => {
       router.push('/');
@@ -123,6 +130,28 @@ export default function RegisterForm() {
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           Mínimo 6 caracteres
+        </p>
+      </div>
+
+      <div>
+        <label
+          htmlFor="confirmPassword"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
+          Confirmar Contraseña
+        </label>
+        <input
+          id="confirmPassword"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          minLength={6}
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          placeholder="Repite tu contraseña"
+        />
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          Debe coincidir con la contraseña anterior
         </p>
       </div>
 
