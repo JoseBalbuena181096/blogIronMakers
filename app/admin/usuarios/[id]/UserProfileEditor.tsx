@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -9,13 +9,26 @@ export default function UserProfileEditor({ user }: { user: any }) {
     const [formData, setFormData] = useState({
         nombre: user.nombre || '',
         rol: user.rol || 'user',
-        nivel_educativo: user.nivel_educativo || '',
+        nivel_educativo_id: user.nivel_educativo_id || '',
         activo: user.activo !== false,
         edad: user.edad || '',
         telefono: user.telefono || '',
         bio: user.bio || ''
     });
+    const [niveles, setNiveles] = useState<any[]>([]);
     const router = useRouter();
+
+    useEffect(() => {
+        const fetchNiveles = async () => {
+            const supabase = createClient();
+            const { data } = await supabase
+                .from('niveles_educativos')
+                .select('*')
+                .order('orden');
+            if (data) setNiveles(data);
+        };
+        fetchNiveles();
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -37,7 +50,7 @@ export default function UserProfileEditor({ user }: { user: any }) {
                 .update({
                     nombre: formData.nombre,
                     rol: formData.rol,
-                    nivel_educativo: formData.nivel_educativo,
+                    nivel_educativo_id: formData.nivel_educativo_id ? parseInt(formData.nivel_educativo_id as string) : null,
                     activo: formData.activo,
                     edad: formData.edad ? parseInt(formData.edad as string) : null,
                     telefono: formData.telefono,
@@ -140,17 +153,17 @@ export default function UserProfileEditor({ user }: { user: any }) {
                             Nivel Educativo
                         </label>
                         <select
-                            name="nivel_educativo"
-                            value={formData.nivel_educativo}
+                            name="nivel_educativo_id"
+                            value={formData.nivel_educativo_id}
                             onChange={handleChange}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                         >
                             <option value="">Seleccionar...</option>
-                            <option value="Secundaria">Secundaria</option>
-                            <option value="Preparatoria">Preparatoria</option>
-                            <option value="Universidad">Universidad</option>
-                            <option value="Posgrado">Posgrado</option>
-                            <option value="Otro">Otro</option>
+                            {niveles.map((nivel) => (
+                                <option key={nivel.id} value={nivel.id}>
+                                    {nivel.nombre}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
