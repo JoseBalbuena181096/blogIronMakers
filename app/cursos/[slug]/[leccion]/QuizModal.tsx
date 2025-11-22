@@ -109,11 +109,7 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
         if (pregunta.tipo === 'abierta') {
           respuestaUsuarioTexto = respuestaUsuario as string;
           try {
-            let BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-04b6c.up.railway.app';
-            // Ensure URL has protocol
-            if (!BACKEND_URL.startsWith('http://') && !BACKEND_URL.startsWith('https://')) {
-              BACKEND_URL = `https://${BACKEND_URL}`;
-            }
+            let BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
             const fullUrl = `${BACKEND_URL}/api/v1/evaluate-quiz`;
             console.log('Evaluating AI question:', {
               question: pregunta.pregunta,
