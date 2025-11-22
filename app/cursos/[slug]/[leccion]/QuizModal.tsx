@@ -109,7 +109,7 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
         if (pregunta.tipo === 'abierta') {
           respuestaUsuarioTexto = respuestaUsuario as string;
           try {
-            const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://backend-python-ia-production.up.railway.app';
+            const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-04b6c.up.railway.app';
             console.log('Evaluating AI question:', {
               question: pregunta.pregunta,
               answer: respuestaUsuario,
