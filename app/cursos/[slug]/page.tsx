@@ -166,6 +166,55 @@ export default async function CursoDetailPage({
                     (p) => p.entrada_id === entrada.id && p.completado
                   );
 
+                  // Logic for locking:
+                  // Locked if:
+                  // 1. User is not enrolled (handled by general access, but here we visualize)
+                  // 2. Previous lesson is NOT completed (unless it's the first lesson)
+
+                  let isLocked = false;
+                  if (index > 0) {
+                    const prevEntrada = entradas[index - 1];
+                    const prevProgreso = progreso.find(p => p.entrada_id === prevEntrada.id);
+                    if (!prevProgreso?.completado) {
+                      isLocked = true;
+                    }
+                  }
+
+                  // If user is not logged in or not enrolled, everything might be locked or open depending on business logic.
+                  // Assuming "audit" mode is allowed, we might not lock. 
+                  // But user request implies strict locking. 
+                  // If no user/subscription, we probably shouldn't show progress locks, but maybe just "Enroll to start".
+                  // However, let's stick to the requested logic: "if user can access next lesson only if previous is completed".
+                  // If user is NOT enrolled, they probably can't see lessons anyway or they are all locked?
+                  // Let's assume if they are seeing this list, they might be enrolled or previewing.
+                  // If they are enrolled (inscripcion exists), we apply the lock.
+
+                  if (inscripcion && isLocked) {
+                    return (
+                      <div
+                        key={entrada.id}
+                        className="block bg-gray-100 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700 opacity-75 cursor-not-allowed"
+                      >
+                        <div className="flex items-center gap-4">
+                          {/* Lock Icon */}
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500">
+                            🔒
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                              {entrada.titulo}
+                            </h3>
+                            <div className="text-sm text-gray-400 dark:text-gray-500">
+                              ⏱️ {entrada.duracion_estimada} min
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
                   return (
                     <Link
                       key={entrada.id}
@@ -174,7 +223,10 @@ export default async function CursoDetailPage({
                     >
                       <div className="flex items-center gap-4">
                         {/* Número y estado */}
-                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center font-bold text-blue-600 dark:text-blue-400">
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold ${estaCompletada
+                            ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
+                            : 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
+                          }`}>
                           {estaCompletada ? '✓' : index + 1}
                         </div>
 

@@ -69,6 +69,21 @@ export default async function LeccionPage({
     if (inscripcion) {
       inscripcionId = inscripcion.id;
 
+      // Check if previous lesson is completed
+      if (prevEntrada) {
+        const { data: prevProgreso } = await supabase
+          .from('progreso_lecciones')
+          .select('completado')
+          .eq('user_id', user.id)
+          .eq('entrada_id', prevEntrada.id)
+          .single();
+
+        if (!prevProgreso?.completado) {
+          // Redirect to course page if previous lesson is not completed
+          redirect(`/cursos/${slug}`);
+        }
+      }
+
       const { data: progresoData } = await supabase
         .from('progreso_lecciones')
         .select('*')
