@@ -190,7 +190,7 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 overflow-y-auto p-4 pt-8">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full my-8">
         {resultado ? (
           // Mostrar resultado
@@ -272,8 +272,8 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
                         <label
                           key={opcionIdx}
                           className={`flex items-center p-4 rounded-lg cursor-pointer transition border-2 ${respuestas[pregunta.id] === opcionIdx
-                              ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-600'
-                              : 'bg-gray-50 dark:bg-gray-700/50 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+                            ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-600'
+                            : 'bg-gray-50 dark:bg-gray-700/50 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
                             }`}
                         >
                           <input
