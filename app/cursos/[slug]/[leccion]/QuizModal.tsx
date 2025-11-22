@@ -250,10 +250,25 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
                           </p>
                         )}
 
-                        {detalle.tipo === 'abierta' && (
-                          <div className="mt-2 p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-                            <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-1">Evaluación IA ({detalle.puntuacion}/100)</p>
-                            <p className="text-gray-600 dark:text-gray-400 italic">"{detalle.feedback}"</p>
+                        {detalle.tipo === 'abierta' && detalle.feedback && (
+                          <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-700">
+                            <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-1">
+                              Evaluación IA ({detalle.puntuacion}/100)
+                            </p>
+                            <p className="text-gray-700 dark:text-gray-300 text-sm">
+                              {detalle.feedback}
+                            </p>
+                          </div>
+                        )}
+
+                        {detalle.tipo === 'abierta' && !detalle.feedback && (
+                          <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">
+                            <p className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                              Evaluación IA ({detalle.puntuacion}/100)
+                            </p>
+                            <p className="text-gray-600 dark:text-gray-400 text-sm italic">
+                              No se pudo generar retroalimentación automática.
+                            </p>
                           </div>
                         )}
                       </div>
@@ -331,8 +346,8 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
                         <label
                           key={opcionIdx}
                           className={`flex items-center p-4 rounded-lg cursor-pointer transition border-2 ${respuestas[pregunta.id] === opcionIdx
-                              ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-600'
-                              : 'bg-gray-50 dark:bg-gray-700/50 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+                            ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-600'
+                            : 'bg-gray-50 dark:bg-gray-700/50 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
                             }`}
                         >
                           <input
