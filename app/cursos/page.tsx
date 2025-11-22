@@ -14,6 +14,7 @@ export default async function CursosPage() {
   const { data: cursos } = await supabase
     .from('cursos')
     .select('*')
+    .eq('publicado', true)
     .order('orden');
 
   return (

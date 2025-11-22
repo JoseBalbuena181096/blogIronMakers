@@ -17,6 +17,7 @@ export interface Curso {
   duracion_estimada: number | null;
   orden: number;
   fecha_creacion: string;
+  publicado: boolean;
 }
 
 export interface Entrada {

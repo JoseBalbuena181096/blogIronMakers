@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Curso } from '@/types/database';
 import DeleteCursoButton from './DeleteCursoButton';
+import VisibilityToggle from './VisibilityToggle';
 
 export const metadata = {
   title: 'Gestionar Cursos - Admin',
@@ -118,30 +119,38 @@ export default async function AdminCursosPage() {
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-3">
-                        <Link
-                          href={`/cursos/${curso.slug}`}
-                          target="_blank"
-                          className="text-sm bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
-                        >
-                          👁️ Ver
-                        </Link>
-                        <Link
-                          href={`/admin/cursos/editar/${curso.slug}`}
-                          className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-                        >
-                          ✏️ Editar
-                        </Link>
-                        <Link
-                          href={`/admin/entradas?curso=${curso.id}`}
-                          className="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-                        >
-                          📝 Lecciones
-                        </Link>
-                        <DeleteCursoButton
-                          cursoId={curso.id}
-                          cursoTitulo={curso.titulo}
-                        />
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between">
+                          <VisibilityToggle
+                            cursoId={curso.id}
+                            initialPublicado={curso.publicado || false}
+                          />
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Link
+                            href={`/cursos/${curso.slug}`}
+                            target="_blank"
+                            className="text-sm bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                          >
+                            👁️ Ver
+                          </Link>
+                          <Link
+                            href={`/admin/cursos/editar/${curso.slug}`}
+                            className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                          >
+                            ✏️ Editar
+                          </Link>
+                          <Link
+                            href={`/admin/entradas?curso=${curso.id}`}
+                            className="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                          >
+                            📝 Lecciones
+                          </Link>
+                          <DeleteCursoButton
+                            cursoId={curso.id}
+                            cursoTitulo={curso.titulo}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

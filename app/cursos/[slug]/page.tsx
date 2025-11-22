@@ -72,6 +72,19 @@ export default async function CursoDetailPage({
       <Navbar />
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Draft Banner */}
+          {!curso.publicado && (
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-8 rounded shadow-sm" role="alert">
+              <div className="flex items-center">
+                <div className="py-1"><svg className="fill-current h-6 w-6 text-yellow-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z" /></svg></div>
+                <div>
+                  <p className="font-bold">Modo Borrador</p>
+                  <p className="text-sm">Este curso no es visible para el público. Solo los administradores pueden verlo.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Header del curso */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
             <div className="flex items-start gap-6">
@@ -224,8 +237,8 @@ export default async function CursoDetailPage({
                       <div className="flex items-center gap-4">
                         {/* Número y estado */}
                         <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold ${estaCompletada
-                            ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
-                            : 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
+                          ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
+                          : 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
                           }`}>
                           {estaCompletada ? '✓' : index + 1}
                         </div>
