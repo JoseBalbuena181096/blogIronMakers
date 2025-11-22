@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Entrada, Curso } from '@/types/database';
 import CursoFilter from './CursoFilter';
+import LessonVisibilityToggle from './LessonVisibilityToggle';
 
 export const metadata = {
   title: 'Gestionar Lecciones - Admin',
@@ -124,7 +125,11 @@ export default async function AdminEntradasPage({
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex items-center gap-3 ml-4">
+                      <LessonVisibilityToggle
+                        entradaId={entrada.id}
+                        initialPublicado={entrada.publicado || false}
+                      />
                       <Link
                         href={`/admin/entradas/quiz?entrada=${entrada.id}`}
                         className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm"

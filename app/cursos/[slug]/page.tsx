@@ -245,9 +245,16 @@ export default async function CursoDetailPage({
 
                         {/* Info */}
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                            {entrada.titulo}
-                          </h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                              {entrada.titulo}
+                            </h3>
+                            {!entrada.publicado && (
+                              <span className="px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                Borrador
+                              </span>
+                            )}
+                          </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
                             ⏱️ {entrada.duracion_estimada} min
                           </div>

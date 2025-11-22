@@ -29,6 +29,7 @@ export interface Entrada {
   orden_en_curso: number;
   duracion_estimada: number | null;
   fecha_publicacion: string;
+  publicado: boolean;
 }
 
 export interface Inscripcion {
