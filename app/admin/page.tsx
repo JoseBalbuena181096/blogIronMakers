@@ -139,7 +139,7 @@ export default async function AdminDashboardPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Link
               href="/admin/cursos"
               className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-lg p-6 text-white hover:shadow-xl transition"
@@ -170,6 +170,17 @@ export default async function AdminDashboardPage() {
               <h3 className="text-xl font-bold mb-2">Editar Landing</h3>
               <p className="text-purple-100 text-sm">
                 Personalizar página principal
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/usuarios"
+              className="bg-gradient-to-br from-orange-600 to-red-600 rounded-lg shadow-lg p-6 text-white hover:shadow-xl transition"
+            >
+              <div className="text-4xl mb-3">👥</div>
+              <h3 className="text-xl font-bold mb-2">Gestionar Usuarios</h3>
+              <p className="text-orange-100 text-sm">
+                Administrar perfiles y accesos
               </p>
             </Link>
           </div>
