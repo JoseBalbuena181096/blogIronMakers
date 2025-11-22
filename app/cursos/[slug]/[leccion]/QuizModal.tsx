@@ -110,13 +110,15 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
           respuestaUsuarioTexto = respuestaUsuario as string;
           try {
             const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-04b6c.up.railway.app';
+            const fullUrl = `${BACKEND_URL}/api/v1/evaluate-quiz`;
             console.log('Evaluating AI question:', {
               question: pregunta.pregunta,
               answer: respuestaUsuario,
-              criteria: pregunta.criterios_evaluacion
+              criteria: pregunta.criterios_evaluacion,
+              url: fullUrl
             });
 
-            const response = await fetch(`${BACKEND_URL}/api/v1/evaluate-quiz`, {
+            const response = await fetch(fullUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
