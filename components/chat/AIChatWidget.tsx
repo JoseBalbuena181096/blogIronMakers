@@ -2,6 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -126,11 +130,11 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
 
                 if (value) {
                     const chunk = decoder.decode(value, { stream: true });
-                    
+
                     // Simulate typewriter effect by processing character by character
                     for (let i = 0; i < chunk.length; i++) {
                         accumulatedResponse += chunk[i];
-                        
+
                         // Update the last message with the accumulated response
                         setMessages((prev) => {
                             const newMessages = [...prev];
@@ -143,7 +147,7 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                             }
                             return newMessages;
                         });
-                        
+
                         // Add delay between characters (typewriter effect)
                         // Faster for spaces, slower for regular characters
                         const delay = chunk[i] === ' ' ? 10 : 30;
@@ -246,7 +250,36 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                                 }`}
                         >
-                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                            {message.role === 'user' ? (
+                                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                            ) : (
+                                <div className="text-sm prose dark:prose-invert max-w-none">
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            code({ node, inline, className, children, ...props }: any) {
+                                                const match = /language-(\w+)/.exec(className || '');
+                                                return !inline && match ? (
+                                                    <SyntaxHighlighter
+                                                        style={vscDarkPlus}
+                                                        language={match[1]}
+                                                        PreTag="div"
+                                                        {...props}
+                                                    >
+                                                        {String(children).replace(/\n$/, '')}
+                                                    </SyntaxHighlighter>
+                                                ) : (
+                                                    <code className={className} {...props}>
+                                                        {children}
+                                                    </code>
+                                                );
+                                            },
+                                        }}
+                                    >
+                                        {message.content}
+                                    </ReactMarkdown>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}
