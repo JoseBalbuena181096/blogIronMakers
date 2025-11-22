@@ -126,20 +126,29 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
 
                 if (value) {
                     const chunk = decoder.decode(value, { stream: true });
-                    accumulatedResponse += chunk;
-
-                    // Update the last message with the accumulated response
-                    setMessages((prev) => {
-                        const newMessages = [...prev];
-                        const lastMsg = newMessages[newMessages.length - 1];
-                        if (lastMsg.role === 'assistant') {
-                            newMessages[newMessages.length - 1] = {
-                                ...lastMsg,
-                                content: accumulatedResponse
-                            };
-                        }
-                        return newMessages;
-                    });
+                    
+                    // Simulate typewriter effect by processing character by character
+                    for (let i = 0; i < chunk.length; i++) {
+                        accumulatedResponse += chunk[i];
+                        
+                        // Update the last message with the accumulated response
+                        setMessages((prev) => {
+                            const newMessages = [...prev];
+                            const lastMsg = newMessages[newMessages.length - 1];
+                            if (lastMsg.role === 'assistant') {
+                                newMessages[newMessages.length - 1] = {
+                                    ...lastMsg,
+                                    content: accumulatedResponse
+                                };
+                            }
+                            return newMessages;
+                        });
+                        
+                        // Add delay between characters (typewriter effect)
+                        // Faster for spaces, slower for regular characters
+                        const delay = chunk[i] === ' ' ? 10 : 30;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
                 }
             }
 
