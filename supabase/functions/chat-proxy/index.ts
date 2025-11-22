@@ -1,7 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const RAILWAY_BACKEND_URL = Deno.env.get('RAILWAY_BACKEND_URL') || '';
-serve(async (req)=>{
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', {
       headers: {
@@ -63,10 +63,11 @@ serve(async (req)=>{
         user_id: user.id
       })
     });
-    const data = await response.json();
-    return new Response(JSON.stringify(data), {
+
+    // Forward the response directly, including the stream
+    return new Response(response.body, {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/plain', // Or 'text/event-stream' if using SSE, but 'text/plain' works for simple streaming
         'Access-Control-Allow-Origin': '*'
       }
     });

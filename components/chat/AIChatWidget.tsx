@@ -66,62 +66,103 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
         setInput('');
         setIsTyping(true);
 
+        // Create a placeholder for the assistant's message
+        setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: '' },
+        ]);
+
         try {
             const { data: { session } } = await supabase.auth.getSession();
 
             if (!session) {
-                setMessages((prev) => [
-                    ...prev,
-                    { role: 'assistant', content: 'Por favor, inicia sesión para usar el chat.' },
-                ]);
+                setMessages((prev) => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1] = { role: 'assistant', content: 'Por favor, inicia sesión para usar el chat.' };
+                    return newMessages;
+                });
                 setIsAuthenticated(false);
                 setIsTyping(false);
                 return;
             }
 
-            const { data, error } = await supabase.functions.invoke('chat-proxy', {
-                body: {
+            // Use fetch directly to the Edge Function URL to handle streaming
+            // Note: We need the URL of the Edge Function. 
+            // Usually it's: https://<project-ref>.supabase.co/functions/v1/chat-proxy
+            // Or we can use supabase.functions.invoke but handling the stream manually might be trickier depending on the SDK version.
+            // Let's try using the standard fetch with the Authorization header.
+
+            const functionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat-proxy`;
+
+            const response = await fetch(functionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({
                     query: userMessage.content,
                     entrada_id: entradaId,
-                },
+                }),
             });
 
-            if (error) {
-                console.error('Error en chat-proxy:', error);
-                throw error;
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
             }
 
-            if (!data || !data.response) {
-                console.error('Respuesta inválida del servidor:', data);
-                throw new Error('Respuesta inválida del servidor');
+            if (!response.body) {
+                throw new Error('No response body received');
             }
 
-            setMessages((prev) => [
-                ...prev,
-                { role: 'assistant', content: data.response },
-            ]);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let done = false;
+            let accumulatedResponse = '';
+
+            while (!done) {
+                const { value, done: doneReading } = await reader.read();
+                done = doneReading;
+
+                if (value) {
+                    const chunk = decoder.decode(value, { stream: true });
+                    accumulatedResponse += chunk;
+
+                    // Update the last message with the accumulated response
+                    setMessages((prev) => {
+                        const newMessages = [...prev];
+                        const lastMsg = newMessages[newMessages.length - 1];
+                        if (lastMsg.role === 'assistant') {
+                            newMessages[newMessages.length - 1] = {
+                                ...lastMsg,
+                                content: accumulatedResponse
+                            };
+                        }
+                        return newMessages;
+                    });
+                }
+            }
+
         } catch (error: any) {
             console.error('Error completo:', error);
-            
+
             let errorMessage = 'Lo siento, hubo un error al procesar tu mensaje.';
-            
-            // Mensajes de error más específicos
-            if (error.message?.includes('FunctionsRelayError')) {
-                errorMessage = 'El servicio de chat no está disponible en este momento. Por favor, contacta al administrador.';
-            } else if (error.message?.includes('FunctionsFetchError')) {
-                errorMessage = 'No se pudo conectar con el servicio de chat. Verifica tu conexión a internet.';
-            } else if (error.message?.includes('Unauthorized')) {
+
+            if (error.message?.includes('Unauthorized')) {
                 errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
                 setIsAuthenticated(false);
             }
-            
-            setMessages((prev) => [
-                ...prev,
-                {
-                    role: 'assistant',
-                    content: errorMessage,
-                },
-            ]);
+
+            setMessages((prev) => {
+                const newMessages = [...prev];
+                // If the last message was the empty placeholder, update it with error
+                if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
+                    newMessages[newMessages.length - 1] = { role: 'assistant', content: errorMessage };
+                } else {
+                    newMessages.push({ role: 'assistant', content: errorMessage });
+                }
+                return newMessages;
+            });
         } finally {
             setIsTyping(false);
         }
@@ -192,8 +233,8 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                     >
                         <div
                             className={`max-w-[80%] rounded-lg px-4 py-2 ${message.role === 'user'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                                 }`}
                         >
                             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
