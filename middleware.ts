@@ -31,38 +31,35 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Proteger rutas de admin
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (!user) {
-      // Redirigir a login si no está autenticado
-      const url = request.nextUrl.clone()
-      url.pathname = '/auth/login'
-      url.searchParams.set('redirect', request.nextUrl.pathname)
-      return NextResponse.redirect(url)
-    }
-
-    // Verificar que sea admin
+  // Verificar estado de cuenta si el usuario está autenticado
+  if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('rol')
+      .select('rol, activo')
       .eq('id', user.id)
       .single()
 
-    if (profile?.rol !== 'admin') {
-      // No es admin, redirigir al home
-      return NextResponse.redirect(new URL('/', request.url))
+    // Si la cuenta está desactivada y no estamos ya en la página de bloqueo
+    if (profile?.activo === false && !request.nextUrl.pathname.startsWith('/auth/blocked')) {
+      return NextResponse.redirect(new URL('/auth/blocked', request.url))
     }
+
+    // Proteger rutas de admin
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+      if (profile?.rol !== 'admin') {
+        // No es admin, redirigir al home
+        return NextResponse.redirect(new URL('/', request.url))
+      }
+    }
+  } else if (request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/mis-cursos')) {
+    // Si no hay usuario y trata de acceder a rutas protegidas
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/login'
+    url.searchParams.set('redirect', request.nextUrl.pathname)
+    return NextResponse.redirect(url)
   }
 
-  // Proteger rutas de usuario autenticado
-  if (request.nextUrl.pathname.startsWith('/mis-cursos')) {
-    if (!user) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/auth/login'
-      url.searchParams.set('redirect', request.nextUrl.pathname)
-      return NextResponse.redirect(url)
-    }
-  }
+
 
   return supabaseResponse
 }
