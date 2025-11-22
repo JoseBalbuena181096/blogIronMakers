@@ -26,6 +26,11 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const supabase = createClient();
 
+    // Resize state
+    const [size, setSize] = useState({ width: 384, height: 500 }); // Default w-96 (384px)
+    const [isResizing, setIsResizing] = useState(false);
+    const resizeRef = useRef<{ startX: number; startY: number; startWidth: number; startHeight: number } | null>(null);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
@@ -52,6 +57,50 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
             subscription.unsubscribe();
         };
     }, [supabase.auth]);
+
+    // Resize handlers
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isResizing || !resizeRef.current) return;
+
+            const deltaX = resizeRef.current.startX - e.clientX;
+            const deltaY = resizeRef.current.startY - e.clientY;
+
+            setSize({
+                width: Math.max(300, resizeRef.current.startWidth + deltaX),
+                height: Math.max(400, resizeRef.current.startHeight + deltaY)
+            });
+        };
+
+        const handleMouseUp = () => {
+            setIsResizing(false);
+            resizeRef.current = null;
+            document.body.style.cursor = 'default';
+        };
+
+        if (isResizing) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = 'nw-resize';
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = 'default';
+        };
+    }, [isResizing]);
+
+    const startResizing = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsResizing(true);
+        resizeRef.current = {
+            startX: e.clientX,
+            startY: e.clientY,
+            startWidth: size.width,
+            startHeight: size.height
+        };
+    };
 
     const sendMessage = async () => {
         if (!input.trim() || isTyping) return;
@@ -89,12 +138,6 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                 setIsTyping(false);
                 return;
             }
-
-            // Use fetch directly to the Edge Function URL to handle streaming
-            // Note: We need the URL of the Edge Function. 
-            // Usually it's: https://<project-ref>.supabase.co/functions/v1/chat-proxy
-            // Or we can use supabase.functions.invoke but handling the stream manually might be trickier depending on the SDK version.
-            // Let's try using the standard fetch with the Authorization header.
 
             const functionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat-proxy`;
 
@@ -203,9 +246,20 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
     }
 
     return (
-        <div className={`fixed bottom-4 right-4 w-96 h-[500px] flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 ${className}`}>
+        <div
+            className={`fixed bottom-4 right-4 flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 ${className}`}
+            style={{ width: size.width, height: size.height }}
+        >
+            {/* Resize Handle */}
+            <div
+                className="absolute top-0 left-0 w-6 h-6 cursor-nw-resize z-50 flex items-center justify-center group"
+                onMouseDown={startResizing}
+            >
+                <div className="w-2 h-2 bg-gray-400 rounded-full group-hover:bg-blue-500 transition-colors"></div>
+            </div>
+
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b bg-blue-600 text-white rounded-t-lg">
+            <div className="flex items-center justify-between p-4 border-b bg-blue-600 text-white rounded-t-lg cursor-move">
                 <div className="flex items-center gap-2">
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
