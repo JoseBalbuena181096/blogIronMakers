@@ -497,6 +497,7 @@ Tu proyecto está ahora:
 ---
 
 **Próximos pasos recomendados:**
+
 1. Configurar dominio personalizado
 2. Habilitar Vercel Analytics
 3. Configurar monitoring de errores (Sentry)
