@@ -10,12 +10,30 @@ Run these scripts in the Supabase SQL Editor in the following order:
 2.  **`02_functions.sql`**: Creates database functions (including AI search).
 3.  **`03_policies.sql`**: Enables security and applies Row Level Security (RLS) policies.
 4.  **`04_data.sql`**: Inserts initial seed data (Educational Levels, Social Media).
+5.  **`05_triggers.sql`**: Sets up automation triggers (Certificates, Auto-enrollment).
 
 ## Usage
 
 -   **New Setup**: Run all scripts in order.
 -   **Reset**: If you need to reset the database, you can drop tables manually or use the dashboard, then run these scripts.
 -   **Updates**: These scripts represent the *current* desired state. Future changes should be created as new migrations in the parent `migrations` folder.
+
+## Exporting Current Database
+
+If you want to export your **entire** existing project (schema + data) to migrate to another project, you have two options:
+
+### Option 1: Supabase CLI (Recommended)
+If you have the Supabase CLI linked to your project:
+```bash
+supabase db dump --data > full_backup.sql
+```
+
+### Option 2: pg_dump (Standard)
+You can use the standard PostgreSQL tool with your connection string (find it in Project Settings > Database > Connection string):
+```bash
+pg_dump "postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres" > full_backup.sql
+```
+*Replace `[YOUR-PASSWORD]` and `[YOUR-PROJECT-REF]` with your actual details.*
 
 ## Edge Functions Deployment
 

@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS public.entradas (
   duracion_estimada INTEGER, -- minutos
   fecha_publicacion TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   publicado BOOLEAN DEFAULT FALSE,
+  calificacion_minima INTEGER DEFAULT 100,
   UNIQUE(slug, curso_id)
 );
 
@@ -111,6 +112,8 @@ CREATE TABLE IF NOT EXISTS public.quiz_preguntas (
   pregunta TEXT NOT NULL,
   opciones JSONB NOT NULL,
   orden INTEGER NOT NULL DEFAULT 0,
+  tipo TEXT DEFAULT 'multiple' CHECK (tipo IN ('multiple', 'verdadero_falso', 'abierta')),
+  criterios_evaluacion TEXT,
   creado_en TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -142,6 +145,21 @@ CREATE TABLE IF NOT EXISTS public.redes_sociales (
 );
 
 ALTER TABLE public.redes_sociales ENABLE ROW LEVEL SECURITY;
+
+-- Proyectos Destacados
+CREATE TABLE IF NOT EXISTS public.proyectos_destacados (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  titulo TEXT NOT NULL,
+  descripcion TEXT,
+  imagen_url TEXT,
+  url_proyecto TEXT,
+  fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  tecnologias TEXT[] DEFAULT '{}',
+  orden INTEGER DEFAULT 0,
+  visible BOOLEAN DEFAULT TRUE
+);
+
+ALTER TABLE public.proyectos_destacados ENABLE ROW LEVEL SECURITY;
 
 -- 3. Triggers
 

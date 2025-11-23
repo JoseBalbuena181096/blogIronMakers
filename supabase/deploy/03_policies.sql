@@ -260,3 +260,27 @@ CREATE POLICY "Admins gestionan redes sociales"
       WHERE id = (select auth.uid()) AND rol = 'admin'
     )
   );
+
+-- ======================
+-- PROYECTOS DESTACADOS
+-- ======================
+-- SELECT: Public (if visible) OR Admin
+CREATE POLICY "Proyectos are viewable by everyone"
+  ON public.proyectos_destacados FOR SELECT
+  USING (
+    visible = true OR 
+    EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE id = (select auth.uid()) AND rol = 'admin'
+    )
+  );
+
+-- ALL: Admin only
+CREATE POLICY "Admins gestionan proyectos"
+  ON public.proyectos_destacados FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE id = (select auth.uid()) AND rol = 'admin'
+    )
+  );
