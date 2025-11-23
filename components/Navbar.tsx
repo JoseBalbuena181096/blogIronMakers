@@ -1,3 +1,5 @@
+'use client';
+
 import UserMenu from './UserMenu';
 import ThemeToggle from './ThemeToggle';
 
