@@ -47,3 +47,10 @@ supabase functions deploy ingest-proxy --no-verify-jwt
 ```
 
 **Note**: Ensure you have the necessary environment variables set up in your Supabase project (e.g., `BACKEND_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`).
+
+**Important Configuration**:
+To enable the automatic Admin role assignment, you must set the `app.admin_email` configuration in your Supabase project:
+1.  Go to SQL Editor.
+2.  Run: `ALTER DATABASE postgres SET app.admin_email = 'your.admin@email.com';` (or set it via Project Settings if available).
+
+## Exporting Current Database

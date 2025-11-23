@@ -33,6 +33,24 @@ BEGIN
 END;
 $$;
 
+-- Function: Handle new user creation (Profile + Admin check)
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, nombre, rol)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'nombre', NEW.email),
+    CASE 
+      WHEN NEW.email = CURRENT_SETTING('app.admin_email', true) THEN 'admin'
+      ELSE 'user'
+    END
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Function: Check course completion and generate certificate
 CREATE OR REPLACE FUNCTION public.check_curso_completion()
 RETURNS TRIGGER AS $$

@@ -162,18 +162,4 @@ CREATE TABLE IF NOT EXISTS public.proyectos_destacados (
 ALTER TABLE public.proyectos_destacados ENABLE ROW LEVEL SECURITY;
 
 -- 3. Triggers
-
--- Handle New User Trigger
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (id, email, nombre, rol)
-  VALUES (new.id, new.email, new.raw_user_meta_data->>'full_name', 'user');
-  RETURN new;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+-- Triggers are defined in 05_triggers.sql
