@@ -44,17 +44,17 @@ export default function DownloadCertificateButton({
     // Cargar y agregar logo PNG
     try {
       const logoUrl = 'https://zksisjytdffzxjtplwsd.supabase.co/storage/v1/object/public/images/team/logo_oficial_png.png';
-      
+
       // Crear imagen y esperar a que cargue
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      
+
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = reject;
         img.src = logoUrl;
       });
-      
+
       // Agregar logo al PDF (centrado arriba del nombre de la empresa)
       const logoSize = 15; // tamaño del logo en mm
       doc.addImage(img, 'PNG', pageWidth / 2 - logoSize / 2, 20, logoSize, logoSize);
@@ -108,19 +108,41 @@ export default function DownloadCertificateButton({
       align: 'center',
     });
 
+    // Limpiar texto de caracteres no soportados (emojis, etc)
+    const cleanText = (text: string) => {
+      return text
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/[\u201C\u201D]/g, '"')
+        .replace(/[\u2013\u2014]/g, '-')
+        .replace(/[^\u0000-\u00FF]/g, '') // Eliminar caracteres fuera de Latin-1
+        .trim();
+    };
+
     // Nombre del curso
-    doc.setFontSize(20);
+    let fontSize = 20;
+    doc.setFontSize(fontSize);
     doc.setTextColor(37, 99, 235); // blue-600
     doc.setFont('helvetica', 'bold');
-    const courseName = doc.splitTextToSize(certificateData.courseName, 200);
-    doc.text(courseName, pageWidth / 2, 122, { align: 'center' });
+
+    const cleanedCourseName = cleanText(certificateData.courseName);
+    // Reducir ancho máximo a 170mm para evitar cortes
+    let courseNameLines = doc.splitTextToSize(cleanedCourseName, 170);
+
+    // Si el título es muy largo (más de 2 líneas), reducir el tamaño de fuente
+    if (courseNameLines.length > 2) {
+      fontSize = 16;
+      doc.setFontSize(fontSize);
+      courseNameLines = doc.splitTextToSize(cleanedCourseName, 170);
+    }
+
+    doc.text(courseNameLines, pageWidth / 2, 122, { align: 'center' });
 
     // Duración del curso (si está disponible)
     if (certificateData.duration) {
       const hours = Math.floor(certificateData.duration / 60);
       const minutes = certificateData.duration % 60;
       let durationText = 'Duración: ';
-      
+
       if (hours > 0) {
         durationText += `${hours} hora${hours !== 1 ? 's' : ''}`;
         if (minutes > 0) {
@@ -129,7 +151,7 @@ export default function DownloadCertificateButton({
       } else {
         durationText += `${minutes} minuto${minutes !== 1 ? 's' : ''}`;
       }
-      
+
       doc.setFontSize(11);
       doc.setTextColor(107, 114, 128);
       doc.setFont('helvetica', 'normal');
@@ -155,27 +177,27 @@ export default function DownloadCertificateButton({
     const sealX = pageWidth / 2 + 60; // Posición del sello a la derecha
     const sealY = signatureY;
     const sealRadius = 22;
-    
+
     // Dibujar sello circular con código de verificación
     // Círculo exterior (borde azul)
     doc.setDrawColor(37, 99, 235); // blue-600
     doc.setLineWidth(1.5);
     doc.circle(sealX, sealY, sealRadius, 'S');
-    
+
     // Círculo interior
     doc.setLineWidth(0.5);
     doc.circle(sealX, sealY, sealRadius - 3, 'S');
-    
+
     // Texto del sello - parte superior curva "IRON MAKERS & AI"
     doc.setFontSize(7);
     doc.setTextColor(37, 99, 235);
     doc.setFont('helvetica', 'bold');
     doc.text('IRON MAKERS & AI', sealX, sealY - 10, { align: 'center' });
-    
+
     // Texto del sello - "CERTIFICADO"
     doc.setFontSize(6);
     doc.text('CERTIFICADO', sealX, sealY - 5, { align: 'center' });
-    
+
     // Código de verificación en el centro del sello
     doc.setFontSize(6);
     doc.setFont('courier', 'bold');
@@ -184,12 +206,12 @@ export default function DownloadCertificateButton({
     codeLines.forEach((line, index) => {
       doc.text(line, sealX, codeY + (index * 3), { align: 'center' });
     });
-    
+
     // Texto inferior del sello
     doc.setFontSize(6);
     doc.setFont('helvetica', 'normal');
     doc.text('VERIFICACIÓN', sealX, sealY + 12, { align: 'center' });
-    
+
     // Línea de firma (a la izquierda del sello)
     doc.setDrawColor(107, 114, 128);
     doc.setLineWidth(0.5);
@@ -223,7 +245,7 @@ export default function DownloadCertificateButton({
     );
 
     // Guardar el PDF
-    const fileName = `Certificado_${certificateData.courseName.replace(/\s+/g, '_')}_${certificateData.studentName.replace(/\s+/g, '_')}.pdf`;
+    const fileName = `Certificado_${cleanedCourseName.replace(/\s+/g, '_')}_${certificateData.studentName.replace(/\s+/g, '_')}.pdf`;
     doc.save(fileName);
   };
 
