@@ -501,4 +501,4 @@ Tu proyecto está ahora:
 1. Configurar dominio personalizado
 2. Habilitar Vercel Analytics
 3. Configurar monitoring de errores (Sentry)
-4. Configurar backups automáticos de Supabase .
+4. Configurar backups automáticos de Supabase
