@@ -1,4 +1,5 @@
 import UserMenu from './UserMenu';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   return (
@@ -7,13 +8,13 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-8">
             <a href="/" className="flex items-center gap-2">
-              <img 
-                src="https://zksisjytdffzxjtplwsd.supabase.co/storage/v1/object/public/images/team/logo_oficial.svg" 
-                alt="Iron Makers" 
+              <img
+                src="https://zksisjytdffzxjtplwsd.supabase.co/storage/v1/object/public/images/team/logo_oficial.svg"
+                alt="Iron Makers"
                 className="w-8 h-8 rounded-full"
               />
               <span className="font-bold text-xl text-gray-900 dark:text-white">
-                Iron Makers & AI
+                Iron Makers &amp; AI
               </span>
             </a>
             <div className="hidden md:flex gap-6">
@@ -31,7 +32,10 @@ export default function Navbar() {
               </a>
             </div>
           </div>
-          <UserMenu />
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </div>
       </div>
     </nav>
