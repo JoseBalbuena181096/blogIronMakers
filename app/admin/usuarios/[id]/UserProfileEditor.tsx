@@ -11,7 +11,7 @@ export default function UserProfileEditor({ user }: { user: any }) {
         rol: user.rol || 'user',
         nivel_educativo_id: user.nivel_educativo_id || '',
         activo: user.activo !== false,
-        edad: user.edad || '',
+        fecha_nacimiento: user.fecha_nacimiento || '',
         telefono: user.telefono || '',
         bio: user.bio || ''
     });
@@ -52,7 +52,7 @@ export default function UserProfileEditor({ user }: { user: any }) {
                     rol: formData.rol,
                     nivel_educativo_id: formData.nivel_educativo_id ? parseInt(formData.nivel_educativo_id as string) : null,
                     activo: formData.activo,
-                    edad: formData.edad ? parseInt(formData.edad as string) : null,
+                    fecha_nacimiento: formData.fecha_nacimiento || null,
                     telefono: formData.telefono,
                     bio: formData.bio
                 })
@@ -92,15 +92,29 @@ export default function UserProfileEditor({ user }: { user: any }) {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Edad
+                            Fecha de Nacimiento
                         </label>
                         <input
-                            type="number"
-                            name="edad"
-                            value={formData.edad}
+                            type="date"
+                            name="fecha_nacimiento"
+                            value={formData.fecha_nacimiento}
                             onChange={handleChange}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                         />
+                        {formData.fecha_nacimiento && (
+                            <p className="text-sm text-gray-500 mt-1">
+                                Edad: {(() => {
+                                    const birthDate = new Date(formData.fecha_nacimiento);
+                                    const today = new Date();
+                                    let age = today.getFullYear() - birthDate.getFullYear();
+                                    const m = today.getMonth() - birthDate.getMonth();
+                                    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                                        age--;
+                                    }
+                                    return age;
+                                })()} años
+                            </p>
+                        )}
                     </div>
                 </div>
 

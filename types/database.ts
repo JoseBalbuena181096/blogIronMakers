@@ -6,6 +6,9 @@ export interface Profile {
   avatar_url: string | null;
   rol: 'user' | 'admin';
   fecha_registro: string;
+  fecha_nacimiento: string | null;
+  telefono: string | null;
+  bio: string | null;
 }
 
 export interface Curso {
