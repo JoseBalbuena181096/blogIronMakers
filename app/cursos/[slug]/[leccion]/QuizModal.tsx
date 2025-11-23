@@ -95,6 +95,9 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
     const supabase = createClient();
 
     try {
+      // Obtener usuario actual para personalización
+      const { data: { user } } = await supabase.auth.getUser();
+
       let puntuacionTotal = 0;
       const detalles: DetalleResultado[] = [];
 
@@ -115,7 +118,8 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
               question: pregunta.pregunta,
               answer: respuestaUsuario,
               criteria: pregunta.criterios_evaluacion,
-              url: fullUrl
+              url: fullUrl,
+              userId: user?.id
             });
 
             const response = await fetch(fullUrl, {
@@ -124,7 +128,8 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
               body: JSON.stringify({
                 question: pregunta.pregunta,
                 user_answer: respuestaUsuario as string,
-                criteria: pregunta.criterios_evaluacion
+                criteria: pregunta.criterios_evaluacion,
+                user_id: user?.id
               })
             });
 
@@ -175,7 +180,6 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
       const aprobado = puntuacionFinal >= calificacionMinima;
 
       // Guardar intento
-      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         await supabase.from('quiz_intentos').insert({
           user_id: user.id,
