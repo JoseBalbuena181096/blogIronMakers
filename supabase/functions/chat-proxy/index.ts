@@ -41,7 +41,7 @@ serve(async (req) => {
         }
       });
     }
-    const { query, entrada_id } = await req.json();
+    const { query, entrada_id, history } = await req.json();
     if (!query) {
       return new Response(JSON.stringify({
         error: 'Query is required'
@@ -60,7 +60,8 @@ serve(async (req) => {
       body: JSON.stringify({
         query,
         entrada_id: entrada_id || null,
-        user_id: user.id
+        user_id: user.id,
+        history: history || []
       })
     });
 

@@ -141,6 +141,12 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
 
             const functionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat-proxy`;
 
+            // Prepare history: exclude the current user message we just added
+            const conversationHistory = messages.slice(0, -1).map(msg => ({
+                role: msg.role,
+                content: msg.content
+            }));
+
             const response = await fetch(functionUrl, {
                 method: 'POST',
                 headers: {
@@ -150,6 +156,7 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                 body: JSON.stringify({
                     query: userMessage.content,
                     entrada_id: entradaId,
+                    history: conversationHistory
                 }),
             });
 
