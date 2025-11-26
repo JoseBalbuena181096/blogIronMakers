@@ -325,13 +325,11 @@ export default async function Home() {
                 })}
               </div>
             </div>
-            <WaveDivider fill="fill-blue-600" />
           </section>
         )}
 
         {/* CTA Final */}
-        <section className="relative py-16 text-white overflow-hidden">
-          <HeroBackground />
+        <section className="relative py-16 bg-gray-900 text-white overflow-hidden">
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl font-bold mb-6">
               ¿Listo para comenzar tu viaje en IA y Robótica?
@@ -354,7 +352,6 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-          <WaveDivider fill="fill-gray-900" />
         </section>
 
         {/* Footer */}
