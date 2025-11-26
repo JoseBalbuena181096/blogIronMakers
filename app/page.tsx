@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import WaveDivider from '@/components/WaveDivider';
+import HeroBackground from '@/components/HeroBackground';
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 
@@ -55,8 +56,9 @@ export default async function Home() {
       <Navbar />
       <main>
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-blue-600 to-indigo-700 text-white py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <section className="relative text-white py-20 overflow-hidden">
+          <HeroBackground />
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               {hero?.titulo || 'Aprende IA y Robótica'}
             </h1>
