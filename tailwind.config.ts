@@ -8,7 +8,17 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      keyframes: {
+        wave: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+      },
+      animation: {
+        wave: 'wave 25s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite',
+      },
+    },
   },
   plugins: [],
 };
