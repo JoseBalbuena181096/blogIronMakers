@@ -330,8 +330,9 @@ export default async function Home() {
         )}
 
         {/* CTA Final */}
-        <section className="relative py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <section className="relative py-16 text-white overflow-hidden">
+          <HeroBackground />
+          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl font-bold mb-6">
               ¿Listo para comenzar tu viaje en IA y Robótica?
             </h2>
