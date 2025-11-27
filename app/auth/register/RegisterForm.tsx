@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -9,10 +9,30 @@ export default function RegisterForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Nuevos campos
+  const [fechaNacimiento, setFechaNacimiento] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [nivelEducativoId, setNivelEducativoId] = useState('');
+  const [bio, setBio] = useState('');
+
+  const [niveles, setNiveles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchNiveles = async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('niveles_educativos')
+        .select('*')
+        .order('orden');
+      if (data) setNiveles(data);
+    };
+    fetchNiveles();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +59,10 @@ export default function RegisterForm() {
       options: {
         data: {
           nombre,
+          fecha_nacimiento: fechaNacimiento || null,
+          telefono: telefono || null,
+          nivel_educativo_id: nivelEducativoId ? parseInt(nivelEducativoId) : null,
+          bio: bio || null,
         },
       },
     });
@@ -90,6 +114,82 @@ export default function RegisterForm() {
           required
           className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           placeholder="Tu nombre"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label
+            htmlFor="fechaNacimiento"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
+            Fecha de Nacimiento
+          </label>
+          <input
+            id="fechaNacimiento"
+            type="date"
+            value={fechaNacimiento}
+            onChange={(e) => setFechaNacimiento(e.target.value)}
+            required
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="telefono"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
+            Teléfono (Opcional)
+          </label>
+          <input
+            id="telefono"
+            type="tel"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            placeholder="+52 55 1234 5678"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label
+          htmlFor="nivelEducativo"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
+          Nivel Educativo
+        </label>
+        <select
+          id="nivelEducativo"
+          value={nivelEducativoId}
+          onChange={(e) => setNivelEducativoId(e.target.value)}
+          required
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        >
+          <option value="">Selecciona tu nivel educativo</option>
+          {niveles.map((nivel) => (
+            <option key={nivel.id} value={nivel.id}>
+              {nivel.nombre}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label
+          htmlFor="bio"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
+          Biografía / Notas
+        </label>
+        <textarea
+          id="bio"
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          rows={3}
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          placeholder="Cuéntanos un poco sobre ti para personalizar tu experiencia..."
         />
       </div>
 
