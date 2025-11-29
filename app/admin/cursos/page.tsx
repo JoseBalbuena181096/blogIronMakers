@@ -24,12 +24,12 @@ export default async function AdminCursosPage() {
   // Obtener todos los cursos
   const { data: cursos } = await supabase
     .from('cursos')
-    .select('*')
+    .select('*, responsable:profiles(nombre, avatar_url)')
     .order('orden');
 
   // Obtener conteo de lecciones por curso
   const cursosConLecciones = await Promise.all(
-    (cursos || []).map(async (curso: Curso) => {
+    (cursos || []).map(async (curso: any) => {
       const { count } = await supabase
         .from('entradas')
         .select('*', { count: 'exact', head: true })
@@ -112,10 +112,28 @@ export default async function AdminCursosPage() {
                         {curso.descripcion || 'Sin descripción'}
                       </p>
 
-                      <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400 mb-4">
+                      <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500 dark:text-gray-400 mb-4">
                         <span>📖 {curso.totalLecciones} lecciones</span>
                         <span>⏱️ {curso.duracion_estimada || 0} min</span>
                         <span>🔗 /{curso.slug}</span>
+                        {curso.responsable && (
+                          <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full border border-blue-100 dark:border-blue-800">
+                            {curso.responsable.avatar_url ? (
+                              <img
+                                src={curso.responsable.avatar_url}
+                                alt={curso.responsable.nombre}
+                                className="w-5 h-5 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold">
+                                {curso.responsable.nombre?.charAt(0) || '?'}
+                              </div>
+                            )}
+                            <span className="text-blue-700 dark:text-blue-300 font-medium">
+                              {curso.responsable.nombre || 'Sin nombre'}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Actions */}

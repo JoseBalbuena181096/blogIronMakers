@@ -18,7 +18,7 @@ export default async function CursoDetailPage({
   // Obtener curso
   const { data: curso } = await supabase
     .from('cursos')
-    .select('*')
+    .select('*, responsable:profiles(nombre, avatar_url, bio, rol)')
     .eq('slug', slug)
     .single();
 
@@ -112,13 +112,34 @@ export default async function CursoDetailPage({
                   {curso.descripcion}
                 </p>
 
-                <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400 mb-6">
+                <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500 dark:text-gray-400 mb-6">
                   <span className="flex items-center gap-1">
                     📖 {totalLecciones} lecciones
                   </span>
                   <span className="flex items-center gap-1">
                     ⏱️ {curso.duracion_estimada} min
                   </span>
+                  {curso.responsable && (
+                    <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full border border-blue-100 dark:border-blue-800">
+                      {curso.responsable.avatar_url ? (
+                        <img
+                          src={curso.responsable.avatar_url}
+                          alt={curso.responsable.nombre}
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-xs text-white font-bold">
+                          {curso.responsable.nombre?.charAt(0) || '?'}
+                        </div>
+                      )}
+                      <div className="flex flex-col">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 leading-none">Instructor</span>
+                        <span className="text-blue-700 dark:text-blue-300 font-medium leading-none">
+                          {curso.responsable.nombre || 'Sin nombre'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Progreso o botón de inscripción */}
