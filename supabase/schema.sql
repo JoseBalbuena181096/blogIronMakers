@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS public.cursos (
   imagen_portada TEXT,
   duracion_estimada INTEGER, -- en minutos
   orden INTEGER DEFAULT 0,
+  responsable_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

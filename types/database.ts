@@ -19,6 +19,7 @@ export interface Curso {
   imagen_portada: string | null;
   duracion_estimada: number | null;
   orden: number;
+  responsable_id: string | null;
   fecha_creacion: string;
   publicado: boolean;
 }

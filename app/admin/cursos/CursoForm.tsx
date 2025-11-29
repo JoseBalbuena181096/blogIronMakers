@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import type { Curso } from '@/types/database';
+import type { Curso, Profile } from '@/types/database';
 
 interface CursoFormProps {
   curso?: Curso;
@@ -14,6 +14,7 @@ export default function CursoForm({ curso, isEdit = false }: CursoFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [profiles, setProfiles] = useState<Profile[]>([]);
 
   const [formData, setFormData] = useState({
     titulo: curso?.titulo || '',
@@ -22,7 +23,23 @@ export default function CursoForm({ curso, isEdit = false }: CursoFormProps) {
     imagen_portada: curso?.imagen_portada || '',
     duracion_estimada: curso?.duracion_estimada || 0,
     orden: curso?.orden || 0,
+    responsable_id: curso?.responsable_id || '',
   });
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('nombre');
+
+      if (data) setProfiles(data);
+      if (error) console.error('Error fetching profiles:', error);
+    };
+
+    fetchProfiles();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,6 +195,25 @@ export default function CursoForm({ curso, isEdit = false }: CursoFormProps) {
             />
           </div>
         </div>
+      </div>
+
+      {/* Responsable */}
+      <div className="mt-6">
+        <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+          Responsable del Curso
+        </label>
+        <select
+          value={formData.responsable_id}
+          onChange={(e) => setFormData({ ...formData, responsable_id: e.target.value })}
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Seleccionar responsable...</option>
+          {profiles.map((profile) => (
+            <option key={profile.id} value={profile.id}>
+              {profile.nombre || profile.email}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Actions */}
