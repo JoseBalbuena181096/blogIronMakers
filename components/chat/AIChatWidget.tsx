@@ -141,8 +141,8 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
 
             const functionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat-proxy`;
 
-            // Prepare history: exclude the current user message we just added
-            const conversationHistory = messages.slice(0, -1).map(msg => ({
+            // Prepare history: use current messages state (which doesn't include the new user message yet)
+            const conversationHistory = messages.map(msg => ({
                 role: msg.role,
                 content: msg.content
             }));
