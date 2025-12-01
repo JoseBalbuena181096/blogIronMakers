@@ -51,24 +51,44 @@ function TextoBloque({ bloque }: { bloque: any }) {
   // Renderizar como Markdown por defecto para permitir formato enriquecido
   return (
     <div className="my-4 prose dark:prose-invert max-w-none">
-      <ReactMarkdown 
+      <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          h1: ({node, ...props}) => <h1 className="text-4xl font-bold mt-8 mb-4" {...props} />,
-          h2: ({node, ...props}) => <h2 className="text-3xl font-bold mt-6 mb-3" {...props} />,
-          h3: ({node, ...props}) => <h3 className="text-2xl font-semibold mt-5 mb-2" {...props} />,
-          p: ({node, ...props}) => <p className="my-3 leading-relaxed" {...props} />,
-          ul: ({node, ...props}) => <ul className="list-disc list-inside space-y-2 my-4" {...props} />,
-          ol: ({node, ...props}) => <ol className="list-decimal list-inside space-y-2 my-4" {...props} />,
-          li: ({node, ...props}) => <li className="ml-4" {...props} />,
-          code: ({node, inline, ...props}: any) => 
+          h1: ({ node, ...props }) => <h1 className="text-4xl font-bold mt-8 mb-4" {...props} />,
+          h2: ({ node, ...props }) => <h2 className="text-3xl font-bold mt-6 mb-3" {...props} />,
+          h3: ({ node, ...props }) => <h3 className="text-2xl font-semibold mt-5 mb-2" {...props} />,
+          p: ({ node, ...props }) => <p className="my-3 leading-relaxed" {...props} />,
+          ul: ({ node, ...props }) => <ul className="list-disc list-inside space-y-2 my-4" {...props} />,
+          ol: ({ node, ...props }) => <ol className="list-decimal list-inside space-y-2 my-4" {...props} />,
+          li: ({ node, ...props }) => <li className="ml-4" {...props} />,
+          code: ({ node, inline, ...props }: any) =>
             inline ? (
               <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
             ) : (
               <code className="block bg-gray-100 dark:bg-gray-800 p-4 rounded-lg my-4 overflow-x-auto" {...props} />
             ),
-          blockquote: ({node, ...props}) => (
+          blockquote: ({ node, ...props }) => (
             <blockquote className="border-l-4 border-blue-500 pl-4 italic my-4 text-gray-700 dark:text-gray-300" {...props} />
+          ),
+          table: ({ node, ...props }) => (
+            <div className="my-6 overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700 border border-gray-300 dark:border-gray-700 rounded-lg" {...props} />
+            </div>
+          ),
+          thead: ({ node, ...props }) => (
+            <thead className="bg-gray-100 dark:bg-gray-800" {...props} />
+          ),
+          tbody: ({ node, ...props }) => (
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900" {...props} />
+          ),
+          tr: ({ node, ...props }) => (
+            <tr className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" {...props} />
+          ),
+          th: ({ node, ...props }) => (
+            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 border-r border-gray-300 dark:border-gray-700 last:border-r-0" {...props} />
+          ),
+          td: ({ node, ...props }) => (
+            <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-r border-gray-300 dark:border-gray-700 last:border-r-0" {...props} />
           ),
         }}
       >
