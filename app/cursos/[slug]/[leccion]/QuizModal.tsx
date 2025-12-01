@@ -252,7 +252,7 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
                       {detalle.esCorrecta ? '✅' : '❌'}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900 dark:text-white mb-2">
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2 whitespace-pre-line">
                         {idx + 1}. {detalle.preguntaTexto}
                       </p>
 
@@ -346,7 +346,7 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
             <div className="space-y-8">
               {preguntas.map((pregunta, idx) => (
                 <div key={pregunta.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-4 text-lg">
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-4 text-lg whitespace-pre-line">
                     {idx + 1}. {pregunta.pregunta}
                   </h4>
 
