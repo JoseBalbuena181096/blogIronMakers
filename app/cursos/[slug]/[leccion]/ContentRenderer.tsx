@@ -7,6 +7,18 @@ import { InlineMath, BlockMath } from 'react-katex';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { ContenidoBloque } from '@/types/database';
+import { useEffect, useRef, useState } from 'react';
+import mermaid from 'mermaid';
+
+// Initialize mermaid
+if (typeof window !== 'undefined') {
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'dark',
+    securityLevel: 'loose',
+    fontFamily: 'inherit',
+  });
+}
 
 interface ContentRendererProps {
   content: ContenidoBloque[] | any;
@@ -98,9 +110,53 @@ function TextoBloque({ bloque }: { bloque: any }) {
   );
 }
 
+function MermaidDiagram({ codigo }: { codigo: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const renderDiagram = async () => {
+      if (!containerRef.current) return;
+
+      try {
+        setError(null);
+        const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
+        const { svg } = await mermaid.render(id, codigo);
+        containerRef.current.innerHTML = svg;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error al renderizar el diagrama');
+        console.error('Mermaid rendering error:', err);
+      }
+    };
+
+    renderDiagram();
+  }, [codigo]);
+
+  if (error) {
+    return (
+      <div className="my-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <p className="text-red-600 dark:text-red-400 text-sm font-semibold mb-2">Error en diagrama Mermaid:</p>
+        <p className="text-red-500 dark:text-red-300 text-xs font-mono">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-6 p-6 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+      <div ref={containerRef} className="flex justify-center" />
+    </div>
+  );
+}
+
 function CodigoBloque({ bloque }: { bloque: any }) {
   const { codigo, lenguaje, mostrarLineas } = bloque.contenido;
 
+  // Render Mermaid diagrams
+  if (lenguaje === 'mermaid') {
+    return <MermaidDiagram codigo={codigo} />;
+  }
+
+  // Render code with syntax highlighting
   return (
     <div className="my-6 rounded-lg overflow-hidden">
       <SyntaxHighlighter

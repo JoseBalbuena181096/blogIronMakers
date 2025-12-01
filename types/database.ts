@@ -140,7 +140,7 @@ export interface BloqueCodigo extends ContenidoBloque {
   tipo: 'codigo';
   contenido: {
     codigo: string;
-    lenguaje: 'python' | 'javascript' | 'typescript' | 'cpp' | 'java' | 'html' | 'css' | 'sql';
+    lenguaje: 'python' | 'javascript' | 'typescript' | 'cpp' | 'java' | 'html' | 'css' | 'sql' | 'mermaid';
     mostrarLineas?: boolean;
   };
 }

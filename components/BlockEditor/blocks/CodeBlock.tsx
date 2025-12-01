@@ -36,6 +36,7 @@ export default function CodeBlock({ block, onChange }: CodeBlockProps) {
                         <option value="sql">SQL</option>
                         <option value="java">Java</option>
                         <option value="cpp">C++</option>
+                        <option value="mermaid">Mermaid (Diagramas)</option>
                     </select>
                 </div>
                 <div className="flex items-center pt-6">
