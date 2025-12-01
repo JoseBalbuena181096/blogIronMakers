@@ -255,7 +255,7 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
     return (
         <div
             className={`fixed bottom-4 right-4 flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 ${className}`}
-            style={{ width: size.width, height: size.height }}
+            style={{ width: size.width, height: size.height, maxHeight: 'calc(100vh - 2rem)' }}
         >
             {/* Resize Handle */}
             <div
