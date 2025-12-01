@@ -56,12 +56,28 @@ export default function ImageBlock({ block, onChange }: ImageBlockProps) {
                     />
                 </div>
             </div>
+            <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    Ancho de la Imagen
+                </label>
+                <select
+                    value={block.contenido.width || 100}
+                    onChange={(e) => handleChange('width', parseInt(e.target.value))}
+                    className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm"
+                >
+                    <option value={25}>25%</option>
+                    <option value={50}>50%</option>
+                    <option value={75}>75%</option>
+                    <option value={100}>100% (Ancho completo)</option>
+                </select>
+            </div>
             {block.contenido.url && (
                 <div className="mt-2 relative aspect-video bg-gray-100 dark:bg-gray-900 rounded overflow-hidden border border-gray-200 dark:border-gray-700">
                     <img
                         src={block.contenido.url}
                         alt={block.contenido.alt}
-                        className="object-contain w-full h-full"
+                        className="object-contain h-full"
+                        style={{ width: `${block.contenido.width || 100}%`, margin: '0 auto' }}
                         onError={(e) => (e.currentTarget.style.display = 'none')}
                     />
                 </div>

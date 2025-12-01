@@ -132,6 +132,7 @@ export interface BloqueImagen extends ContenidoBloque {
     url: string;
     alt: string;
     caption?: string;
+    width?: number; // Percentage: 25, 50, 75, 100
   };
 }
 

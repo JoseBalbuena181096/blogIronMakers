@@ -135,11 +135,16 @@ function LatexBloque({ bloque }: { bloque: any }) {
 }
 
 function ImagenBloque({ bloque }: { bloque: any }) {
-  const { url, alt, caption } = bloque.contenido;
+  const { url, alt, caption, width = 100 } = bloque.contenido;
 
   return (
-    <figure className="my-6">
-      <img src={url} alt={alt} className="rounded-lg w-full shadow-lg" />
+    <figure className="my-6 flex flex-col items-center">
+      <img
+        src={url}
+        alt={alt}
+        className="rounded-lg shadow-lg max-w-full"
+        style={{ width: `${width}%` }}
+      />
       {caption && (
         <figcaption className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
           {caption}
