@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 interface Opcion {
   texto: string;
@@ -341,15 +342,18 @@ export default function QuizManager({
               // Modo vista
               <div>
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
+                  <div className="flex-1 w-full min-w-0">
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="px-2 py-1 text-xs font-semibold bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300 uppercase">
+                      <span className="px-2 py-1 text-xs font-semibold bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300 uppercase flex-shrink-0">
                         {pregunta.tipo === 'multiple' ? 'Opción Múltiple' :
                           pregunta.tipo === 'verdadero_falso' ? 'Verdadero/Falso' : 'Abierta (IA)'}
                       </span>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {idx + 1}. {pregunta.pregunta}
-                      </h3>
+                      <div className="font-semibold text-gray-900 dark:text-white flex-1">
+                        <span className="mr-2">{idx + 1}.</span>
+                        <div className="inline-block w-full align-top">
+                          <MarkdownRenderer content={pregunta.pregunta} preserveWhitespace={true} />
+                        </div>
+                      </div>
                     </div>
 
                     {pregunta.tipo === 'abierta' ? (
@@ -363,8 +367,8 @@ export default function QuizManager({
                           <div
                             key={opcionIdx}
                             className={`p-2 rounded ${opcion.es_correcta
-                                ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-                                : 'bg-gray-50 dark:bg-gray-700/50'
+                              ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+                              : 'bg-gray-50 dark:bg-gray-700/50'
                               }`}
                           >
                             <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -376,7 +380,7 @@ export default function QuizManager({
                       </div>
                     )}
                   </div>
-                  <div className="flex gap-2 ml-4">
+                  <div className="flex gap-2 ml-4 flex-shrink-0">
                     <button
                       onClick={() => setEditando(idx)}
                       className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"

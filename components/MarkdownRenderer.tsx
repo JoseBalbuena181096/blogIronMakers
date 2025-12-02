@@ -22,6 +22,7 @@ if (typeof window !== 'undefined') {
 interface MarkdownRendererProps {
     content: string;
     className?: string;
+    preserveWhitespace?: boolean;
 }
 
 function MermaidDiagram({ codigo }: { codigo: string }) {
@@ -62,7 +63,7 @@ function MermaidDiagram({ codigo }: { codigo: string }) {
     );
 }
 
-export default function MarkdownRenderer({ content, className = "" }: MarkdownRendererProps) {
+export default function MarkdownRenderer({ content, className = "", preserveWhitespace = false }: MarkdownRendererProps) {
     // Helper function to detect and render GitHub-style alerts
     const renderBlockquote = ({ node, children, ...props }: any) => {
         // Convert children to string to check for alert syntax
@@ -138,7 +139,7 @@ export default function MarkdownRenderer({ content, className = "" }: MarkdownRe
                         <h4 className="text-xl font-semibold mt-5 mb-3 text-gray-800 dark:text-gray-200" {...props} />
                     ),
                     p: ({ node, ...props }) => (
-                        <p className="my-5 leading-[1.8] text-gray-700 dark:text-gray-300 text-base" {...props} />
+                        <p className={`my-5 leading-[1.8] text-gray-700 dark:text-gray-300 text-base ${preserveWhitespace ? 'whitespace-pre-wrap' : ''}`} {...props} />
                     ),
                     ul: ({ node, ...props }) => (
                         <ul className="list-none space-y-3 my-6 pl-0" {...props} />

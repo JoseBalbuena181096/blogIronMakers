@@ -256,7 +256,7 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
                       <div className="font-semibold text-gray-900 dark:text-white mb-2">
                         <span className="mr-2">{idx + 1}.</span>
                         <div className="inline-block w-full align-top">
-                          <MarkdownRenderer content={detalle.preguntaTexto} />
+                          <MarkdownRenderer content={detalle.preguntaTexto} preserveWhitespace={true} />
                         </div>
                       </div>
 
@@ -277,7 +277,7 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
                               Evaluación IA ({detalle.puntuacion}/100)
                             </p>
                             <div className="text-gray-700 dark:text-gray-300 text-sm">
-                              <MarkdownRenderer content={detalle.feedback} />
+                              <MarkdownRenderer content={detalle.feedback} preserveWhitespace={true} />
                             </div>
                           </div>
                         )}
@@ -352,7 +352,7 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
                 <div key={pregunta.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
                   <div className="font-semibold text-gray-900 dark:text-white mb-4 text-lg">
                     <span className="mr-2">{idx + 1}.</span>
-                    <MarkdownRenderer content={pregunta.pregunta} />
+                    <MarkdownRenderer content={pregunta.pregunta} preserveWhitespace={true} />
                   </div>
 
                   {pregunta.tipo === 'abierta' ? (
