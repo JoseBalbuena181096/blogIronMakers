@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 interface Opcion {
   texto: string;
@@ -251,10 +252,13 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
                     <div className={`mt-1 min-w-[24px] ${detalle.esCorrecta ? 'text-green-600' : 'text-red-600'}`}>
                       {detalle.esCorrecta ? '✅' : '❌'}
                     </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900 dark:text-white mb-2 whitespace-pre-line">
-                        {idx + 1}. {detalle.preguntaTexto}
-                      </p>
+                    <div className="flex-1 w-full min-w-0">
+                      <div className="font-semibold text-gray-900 dark:text-white mb-2">
+                        <span className="mr-2">{idx + 1}.</span>
+                        <div className="inline-block w-full align-top">
+                          <MarkdownRenderer content={detalle.preguntaTexto} />
+                        </div>
+                      </div>
 
                       <div className="text-sm space-y-1">
                         <p className="text-gray-700 dark:text-gray-300">
@@ -272,9 +276,9 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
                             <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-1">
                               Evaluación IA ({detalle.puntuacion}/100)
                             </p>
-                            <p className="text-gray-700 dark:text-gray-300 text-sm">
-                              {detalle.feedback}
-                            </p>
+                            <div className="text-gray-700 dark:text-gray-300 text-sm">
+                              <MarkdownRenderer content={detalle.feedback} />
+                            </div>
                           </div>
                         )}
 
@@ -346,9 +350,10 @@ export default function QuizModal({ entradaId, onQuizComplete, onClose }: QuizMo
             <div className="space-y-8">
               {preguntas.map((pregunta, idx) => (
                 <div key={pregunta.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-4 text-lg whitespace-pre-line">
-                    {idx + 1}. {pregunta.pregunta}
-                  </h4>
+                  <div className="font-semibold text-gray-900 dark:text-white mb-4 text-lg">
+                    <span className="mr-2">{idx + 1}.</span>
+                    <MarkdownRenderer content={pregunta.pregunta} />
+                  </div>
 
                   {pregunta.tipo === 'abierta' ? (
                     <textarea
