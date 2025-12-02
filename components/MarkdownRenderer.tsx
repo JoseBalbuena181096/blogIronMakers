@@ -7,7 +7,7 @@ import { InlineMath, BlockMath } from 'react-katex';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import mermaid from 'mermaid';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 
 // Initialize mermaid
 if (typeof window !== 'undefined') {
@@ -64,6 +64,21 @@ function MermaidDiagram({ codigo }: { codigo: string }) {
 }
 
 export default function MarkdownRenderer({ content, className = "", preserveWhitespace = false }: MarkdownRendererProps) {
+    // Preprocess content to preserve indentation if requested
+    const processedContent = useMemo(() => {
+        if (!preserveWhitespace || !content) return content;
+
+        return content
+            .split('\n')
+            .map(line => {
+                // Replace leading tabs with 4 spaces first
+                const withSpaces = line.replace(/^\t+/, match => '    '.repeat(match.length));
+                // Replace leading spaces with non-breaking spaces
+                return withSpaces.replace(/^ +/g, match => '\u00a0'.repeat(match.length));
+            })
+            .join('\n');
+    }, [content, preserveWhitespace]);
+
     // Helper function to detect and render GitHub-style alerts
     const renderBlockquote = ({ node, children, ...props }: any) => {
         // Convert children to string to check for alert syntax
@@ -227,7 +242,7 @@ export default function MarkdownRenderer({ content, className = "", preserveWhit
                     ),
                 }}
             >
-                {content}
+                {processedContent}
             </ReactMarkdown>
         </div>
     );
