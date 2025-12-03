@@ -167,21 +167,23 @@ export default async function CursoDetailPage({
                       )}
                     </div>
                   ) : (
-                    <EnrollButton cursoId={curso.id} cursoTitulo={curso.titulo} />
+                    !curso.is_paid && <EnrollButton cursoId={curso.id} cursoTitulo={curso.titulo} />
                   )
                 ) : (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                    <p className="text-sm text-blue-800 dark:text-blue-300 mb-3">
-                      💡 Regístrate para llevar el control de tu progreso y obtener un
-                      certificado al finalizar
-                    </p>
-                    <Link
-                      href="/auth/register"
-                      className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
-                    >
-                      Crear Cuenta Gratis
-                    </Link>
-                  </div>
+                  !curso.is_paid && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <p className="text-sm text-blue-800 dark:text-blue-300 mb-3">
+                        💡 Regístrate para llevar el control de tu progreso y obtener un
+                        certificado al finalizar
+                      </p>
+                      <Link
+                        href="/auth/register"
+                        className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+                      >
+                        Crear Cuenta Gratis
+                      </Link>
+                    </div>
+                  )
                 )}
               </div>
             </div>

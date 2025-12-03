@@ -24,6 +24,7 @@ export default function CursoForm({ curso, isEdit = false }: CursoFormProps) {
     duracion_estimada: curso?.duracion_estimada || 0,
     orden: curso?.orden || 0,
     responsable_id: curso?.responsable_id || '',
+    is_paid: curso?.is_paid || false,
   });
 
   useEffect(() => {
@@ -197,23 +198,49 @@ export default function CursoForm({ curso, isEdit = false }: CursoFormProps) {
         </div>
       </div>
 
-      {/* Responsable */}
-      <div className="mt-6">
-        <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-          Responsable del Curso
-        </label>
-        <select
-          value={formData.responsable_id}
-          onChange={(e) => setFormData({ ...formData, responsable_id: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Seleccionar responsable...</option>
-          {profiles.map((profile) => (
-            <option key={profile.id} value={profile.id}>
-              {profile.nombre || profile.email}
-            </option>
-          ))}
-        </select>
+      {/* Responsable y Tipo de Curso */}
+      <div className="grid md:grid-cols-2 gap-6 mt-6">
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+            Responsable del Curso
+          </label>
+          <select
+            value={formData.responsable_id}
+            onChange={(e) => setFormData({ ...formData, responsable_id: e.target.value })}
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Seleccionar responsable...</option>
+            {profiles.map((profile) => (
+              <option key={profile.id} value={profile.id}>
+                {profile.nombre || profile.email}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center h-full pt-6">
+          <label className="flex items-center cursor-pointer">
+            <div className="relative">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={formData.is_paid}
+                onChange={(e) => setFormData({ ...formData, is_paid: e.target.checked })}
+              />
+              <div
+                className={`block w-14 h-8 rounded-full transition-colors ${formData.is_paid ? 'bg-blue-600' : 'bg-gray-600'
+                  }`}
+              ></div>
+              <div
+                className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${formData.is_paid ? 'transform translate-x-6' : ''
+                  }`}
+              ></div>
+            </div>
+            <div className="ml-3 text-gray-700 dark:text-gray-300 font-medium">
+              Curso de Pago (Acceso Restringido)
+            </div>
+          </label>
+        </div>
       </div>
 
       {/* Actions */}

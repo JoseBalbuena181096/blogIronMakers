@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar';
 import { createClient } from '@/lib/supabase/server';
-import { getUser } from '@/lib/supabase/auth';
+
+import { getUser, getUserProfile } from '@/lib/supabase/auth';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Curso, Entrada, ProgresoLeccion } from '@/types/database';
@@ -102,6 +103,21 @@ export default async function LeccionPage({
           tiempo_dedicado: 0,
         });
       }
+    }
+  }
+
+  // Access Control for Paid Courses
+  if (curso.is_paid) {
+    const profile = await getUserProfile();
+    const isAdmin = profile?.rol === 'admin';
+
+    if (!inscripcionId && !isAdmin) {
+      // User is not enrolled and not an admin
+      // Redirect to course page or show access denied
+      // For now, redirect to course page which will show "Contact Admin" or similar (implied by no enroll button)
+      // Or maybe we should show a specific "Access Denied" page?
+      // Redirecting to course page is safer.
+      redirect(`/cursos/${slug}`);
     }
   }
 

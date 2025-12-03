@@ -22,6 +22,7 @@ export interface Curso {
   responsable_id: string | null;
   fecha_creacion: string;
   publicado: boolean;
+  is_paid: boolean;
 }
 
 export interface Entrada {
