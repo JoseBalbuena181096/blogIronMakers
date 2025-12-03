@@ -46,7 +46,8 @@ CREATE TABLE IF NOT EXISTS public.cursos (
   orden INTEGER DEFAULT 0,
   responsable_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  publicado BOOLEAN DEFAULT FALSE
+  publicado BOOLEAN DEFAULT FALSE,
+  is_paid BOOLEAN DEFAULT FALSE
 );
 
 ALTER TABLE public.cursos ENABLE ROW LEVEL SECURITY;
