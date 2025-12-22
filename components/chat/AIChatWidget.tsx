@@ -12,6 +12,12 @@ interface Message {
     content: string;
 }
 
+interface FileAttachment {
+    filename: string;
+    mime_type: string;
+    data: string; // base64
+}
+
 interface AIChatWidgetProps {
     entradaId?: string;
     className?: string;
@@ -23,7 +29,9 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const supabase = createClient();
 
     // Resize state
@@ -102,6 +110,34 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
         };
     };
 
+    // Helper function to convert File to base64
+    const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const result = reader.result as string;
+                // Remove data URL prefix (e.g., "data:image/png;base64,")
+                const base64 = result.split(',')[1];
+                resolve(base64);
+            };
+            reader.onerror = error => reject(error);
+        });
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        setAttachedFiles(prev => [...prev, ...files]);
+        // Reset input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const removeFile = (index: number) => {
+        setAttachedFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
     const sendMessage = async () => {
         if (!input.trim() || isTyping) return;
 
@@ -147,6 +183,21 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                 content: msg.content
             }));
 
+            // Process attached files
+            const fileAttachments: FileAttachment[] = [];
+            for (const file of attachedFiles) {
+                try {
+                    const base64 = await fileToBase64(file);
+                    fileAttachments.push({
+                        filename: file.name,
+                        mime_type: file.type,
+                        data: base64
+                    });
+                } catch (error) {
+                    console.error('Error converting file:', error);
+                }
+            }
+
             const response = await fetch(functionUrl, {
                 method: 'POST',
                 headers: {
@@ -156,9 +207,13 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                 body: JSON.stringify({
                     query: userMessage.content,
                     entrada_id: entradaId,
-                    history: conversationHistory
+                    history: conversationHistory,
+                    files: fileAttachments.length > 0 ? fileAttachments : undefined
                 }),
             });
+
+            // Clear attached files after sending
+            setAttachedFiles([]);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
@@ -376,6 +431,39 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                         Debes iniciar sesión para enviar mensajes
                     </div>
                 )}
+
+                {/* File Preview */}
+                {attachedFiles.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-2">
+                        {attachedFiles.map((file, index) => (
+                            <div key={index} className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg text-sm">
+                                <span className="text-blue-700 dark:text-blue-300 truncate max-w-[150px]">
+                                    {file.name}
+                                </span>
+                                <button
+                                    onClick={() => removeFile(index)}
+                                    className="text-red-600 hover:text-red-800 dark:text-red-400"
+                                    aria-label="Eliminar archivo"
+                                >
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* Hidden file input */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*,.pdf,.py,.cpp,.c,.h,.js,.ts,.sql,.txt,.md"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                />
+
                 <div className="flex gap-2">
                     <input
                         type="text"
@@ -386,6 +474,19 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                         disabled={isTyping || isAuthenticated === false}
                         className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white disabled:opacity-50"
                     />
+
+                    {/* Attach file button */}
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isTyping || isAuthenticated === false}
+                        className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label="Adjuntar archivo"
+                    >
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                    </button>
+
                     <button
                         onClick={sendMessage}
                         disabled={!input.trim() || isTyping || isAuthenticated === false}
