@@ -4,8 +4,11 @@ import { useState, useRef, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import 'katex/dist/katex.min.css'; // Import KaTeX CSS
 
 interface Message {
     role: 'user' | 'assistant';
@@ -417,7 +420,8 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                             ) : (
                                 <div className="text-sm prose dark:prose-invert max-w-none">
                                     <ReactMarkdown
-                                        remarkPlugins={[remarkGfm]}
+                                        remarkPlugins={[remarkGfm, remarkMath]}
+                                        rehypePlugins={[rehypeKatex]}
                                         components={{
                                             code({ node, inline, className, children, ...props }: any) {
                                                 const match = /language-(\w+)/.exec(className || '');
