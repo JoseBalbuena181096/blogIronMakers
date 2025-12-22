@@ -10,6 +10,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 interface Message {
     role: 'user' | 'assistant';
     content: string;
+    files?: { name: string; type: string; url: string }[]; // For displaying attached files
 }
 
 interface FileAttachment {
@@ -150,7 +151,18 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
             return;
         }
 
-        const userMessage: Message = { role: 'user', content: input };
+        // Prepare file info for display in message
+        const messageFiles = attachedFiles.map(file => ({
+            name: file.name,
+            type: file.type,
+            url: URL.createObjectURL(file) // Create temporary URL for preview
+        }));
+
+        const userMessage: Message = {
+            role: 'user',
+            content: input,
+            files: messageFiles.length > 0 ? messageFiles : undefined
+        };
         setMessages((prev) => [...prev, userMessage]);
         setInput('');
         setIsTyping(true);
@@ -375,7 +387,33 @@ export default function AIChatWidget({ entradaId, className }: AIChatWidgetProps
                                 }`}
                         >
                             {message.role === 'user' ? (
-                                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                <div className="space-y-2">
+                                    {/* Display attached files */}
+                                    {message.files && message.files.length > 0 && (
+                                        <div className="space-y-2 mb-2">
+                                            {message.files.map((file, fileIndex) => (
+                                                <div key={fileIndex} className="bg-white/10 rounded p-2">
+                                                    {file.type.startsWith('image/') ? (
+                                                        <img
+                                                            src={file.url}
+                                                            alt={file.name}
+                                                            className="max-w-full h-auto rounded max-h-48 object-contain"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 text-xs">
+                                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                            </svg>
+                                                            <span className="truncate">{file.name}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {/* Display text content */}
+                                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                </div>
                             ) : (
                                 <div className="text-sm prose dark:prose-invert max-w-none">
                                     <ReactMarkdown
