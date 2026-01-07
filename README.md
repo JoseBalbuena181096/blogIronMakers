@@ -44,16 +44,16 @@ graph TB
     subgraph Cloud_Infrastructure [Infraestructura Cloud]
         direction TB
         
-        subgraph Vercel_Frontend [Vercel (Frontend)]
+        subgraph Vercel_Frontend ["Vercel (Frontend)"]
             NextApp[Next.js App Router]
             AuthPages[Auth Pages]
             Dashboard[Dashboard Estudiante]
         end
         
-        subgraph Railway_Backend [Railway (Backend IA)]
+        subgraph Railway_Backend ["Railway (Backend IA)"]
             FastAPI[FastAPI Gateway]
             
-            subgraph AI_Engine [Motor de IA (LangGraph)]
+            subgraph AI_Engine ["Motor de IA (LangGraph)"]
                 Supervisor[Supervisor Agent]
                 Coder[Programming Agent]
                 Tutor[Socratic Tutor]
@@ -63,7 +63,7 @@ graph TB
             Services[Servicios: Gmail, Resend, PDF]
         end
         
-        subgraph Data_Layer [Supabase (Datos & Auth)]
+        subgraph Data_Layer ["Supabase (Datos & Auth)"]
             Auth[Auth Service]
             Postgres[(PostgreSQL + pgvector)]
             Buckets[File Storage]
