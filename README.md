@@ -1,195 +1,310 @@
-# 🎓 Blog Educativo - Sistema de Cursos Online
+# 🚀 Sistema Iron Makers
 
-Sistema completo de gestión de cursos educativos con autenticación, tracking de progreso, generación automática de certificados y panel de administración. Este proyecto está diseñado para ofrecer una experiencia de aprendizaje moderna y fluida, tanto para estudiantes como para administradores.
+Bienvenido a la documentación oficial del **Sistema Iron Makers**. Esta plataforma es un ecosistema educativo avanzado que fusiona un frontend moderno (Next.js) con un backend de Inteligencia Artificial (FastAPI + LangChain).
 
-## 📋 Características Principales
-
-### Frontend Público
-- 🏠 **Landing Page Dinámica**: Contenido totalmente personalizable desde la base de datos (secciones, equipo, proyectos).
-- 📚 **Catálogo de Cursos**: Navegación intuitiva de cursos disponibles con filtrado y búsqueda.
-- 📖 **Visualizador de Lecciones**: Renderizado de contenido rico soportando:
-  - Bloques de texto con formato enriquecido.
-  - **Código**: Syntax highlighting para múltiples lenguajes (Python, JS, TS, etc.).
-  - **Matemáticas**: Renderizado de fórmulas LaTeX con KaTeX.
-  - **Multimedia**: Imágenes y videos (YouTube/Vimeo) embebidos.
-- 📊 **Tracking de Progreso**: Sistema granular de seguimiento por lección.
-- 🏆 **Certificados Automáticos**: Generación de PDF verificable al completar el 100% del curso.
-- 👤 **Panel de Usuario**: Dashboard personal con cursos inscritos, progreso y certificados obtenidos.
-
-### Panel de Administración
-- 📈 **Dashboard**: Métricas en tiempo real de usuarios, inscripciones y cursos.
-- ✏️ **Gestión de Cursos**: CRUD completo para cursos y lecciones.
-- 📝 **Editor de Contenido**: Editor basado en bloques JSONB para crear lecciones interactivas.
-- 👥 **Gestión de Usuarios**: Visualización de usuarios registrados.
-
-### Seguridad y Autenticación
-- 🔐 **Supabase Auth**: Sistema robusto de autenticación (Email/Password).
-- 🛡️ **Row Level Security (RLS)**: Protección de datos a nivel de fila en PostgreSQL.
-- 👮 **Roles**: Sistema de roles (admin/user) gestionado en la tabla `profiles`.
-- 🚪 **Middleware**: Protección de rutas en Next.js basado en roles.
+El sistema no solo entrega contenido educativo, sino que actúa como un tutor personalizado que entiende el contexto del estudiante, modera el contenido por seguridad y asiste en tareas de programación compleja.
 
 ---
 
-## 🚀 Tecnologías
+## 🎥 Demo del Funcionamiento
 
-### Core
-- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
-- **Lenguaje**: [TypeScript 5.9](https://www.typescriptlang.org/)
-- **Estilos**: [Tailwind CSS 3](https://tailwindcss.com/)
+[![Sistema Iron Makers Demo](https://img.youtube.com/vi/vcGux2oKRWc/0.jpg)](https://www.youtube.com/watch?v=vcGux2oKRWc)
 
-### Backend & Datos
-- **Base de Datos**: [Supabase](https://supabase.com/) (PostgreSQL)
-- **Autenticación**: `@supabase/ssr` & `@supabase/supabase-js`
-- **Almacenamiento**: Supabase Storage (para imágenes y certificados)
-
-### Renderizado & Utilidades
-- **PDF**: `@react-pdf/renderer` para generación de certificados.
-- **Código**: `react-syntax-highlighter`.
-- **Matemáticas**: `katex` y `react-katex`.
-- **Markdown**: `react-markdown` y `remark-gfm`.
+*Haz clic en la imagen para ver el video de demostración.*
 
 ---
 
-## 🗄️ Base de Datos y Schema
+## 📚 Índice
 
-El proyecto utiliza una base de datos PostgreSQL alojada en Supabase. El esquema está diseñado para ser escalable y seguro.
+1. [Arquitectura Global](#-arquitectura-global)
+2. [Flujo de Datos & Interacción](#-flujo-de-datos--interacción)
+3. [Componentes del Sistema](#-componentes-del-sistema)
+    - [Frontend (Blog Educativo)](#frontend-blog-educativo)
+    - [Backend (IA & Lógica)](#backend-ia--lógica)
+4. [Deep Dive: Arquitectura de IA](#-deep-dive-arquitectura-de-ia-backend)
+    - [El Grafo (LangGraph)](#1-el-grafo-langgraph)
+    - [Sistema de Ruteo (Supervisor)](#2-sistema-de-ruteo-supervisor)
+    - [Agentes Especializados](#3-agentes-especializados)
+    - [Pipeline RAG (Contexto)](#4-pipeline-rag-contexto)
+5. [Guía de Instalación Local](#-guía-de-instalación-local)
+6. [Guía de Despliegue (Producción)](#-guía-de-despliegue-producción)
 
-### Tablas Principales
+---
 
-1.  **`profiles`**: Extensión de la tabla `auth.users`. Almacena información pública del usuario (nombre, avatar, rol).
-2.  **`cursos`**: Catálogo de cursos (título, slug, descripción, portada).
-3.  **`entradas`** (Lecciones): Contenido de las lecciones. Relacionada con `cursos`. Usa un campo `JSONB` para el contenido modular.
-4.  **`inscripciones`**: Tabla pivote que registra qué usuarios están inscritos en qué cursos y su estado (inscrito/completado).
-5.  **`progreso_lecciones`**: Tracking granular. Registra si un usuario ha completado una lección específica.
-6.  **`certificados`**: Almacena los certificados emitidos. Contiene el código de verificación único y la URL del PDF.
+## 🏛 Arquitectura Global
 
-### Tablas de Contenido (Landing Page)
-7.  **`contenido_landing`**: Textos dinámicos de la home.
-8.  **`integrantes_equipo`**: Miembros del equipo mostrados en "Quiénes somos".
-9.  **`proyectos_destacados`**: Portfolio de proyectos.
+El sistema opera bajo una arquitectura de **Microservicios Híbridos**. El frontend es estático/ISR (Incremental Static Regeneration) optimizado para rapidez, mientras que el backend es un servicio API RESTful dinámico que mantiene estado conversacional a través de grafos de LangChain (LangGraph).
 
-### Diagrama de Relaciones (Simplificado)
 ```mermaid
-erDiagram
-    profiles ||--o{ inscripciones : "tiene"
-    profiles ||--o{ progreso_lecciones : "registra"
-    profiles ||--o{ certificados : "gana"
-    cursos ||--o{ entradas : "contiene"
-    cursos ||--o{ inscripciones : "tiene"
-    cursos ||--o{ certificados : "emite"
-    entradas ||--o{ progreso_lecciones : "tiene"
+graph TB
+    subgraph Client [Cliente]
+        Browser[Navegador Usuario]
+    end
+
+    subgraph Cloud_Infrastructure [Infraestructura Cloud]
+        direction TB
+        
+        subgraph Vercel_Frontend [Vercel (Frontend)]
+            NextApp[Next.js App Router]
+            AuthPages[Auth Pages]
+            Dashboard[Dashboard Estudiante]
+        end
+        
+        subgraph Railway_Backend [Railway (Backend IA)]
+            FastAPI[FastAPI Gateway]
+            
+            subgraph AI_Engine [Motor de IA (LangGraph)]
+                Supervisor[Supervisor Agent]
+                Coder[Programming Agent]
+                Tutor[Socratic Tutor]
+                Mod[Safety Guard]
+            end
+            
+            Services[Servicios: Gmail, Resend, PDF]
+        end
+        
+        subgraph Data_Layer [Supabase (Datos & Auth)]
+            Auth[Auth Service]
+            Postgres[(PostgreSQL + pgvector)]
+            Buckets[File Storage]
+        end
+        
+        subgraph External_AI [Modelos LLM]
+            GPT4[OpenAI GPT-4o]
+            Gemini[Google Gemini 1.5]
+        end
+    end
+
+    Browser -->|HTTPS| NextApp
+    Browser -->|Websockets/HTTP| FastAPI
+    
+    NextApp -->|Auth/Data| Data_Layer
+    FastAPI -->|Valida Token| Data_Layer
+    FastAPI -->|Inferencia| External_AI
+    
+    Supervisor -->|Planifica| AI_Engine
+    AI_Engine -->|Tools| Services
 ```
 
 ---
 
-## ⚡ Supabase y Migraciones
+## 🔄 Flujo de Datos & Interacción
 
-El proyecto mantiene todo el esquema de base de datos y funciones en el directorio `/supabase`.
+### ¿Cómo interactúa el Frontend con el Backend?
 
-### Estructura de Archivos
-- `supabase/schema.sql`: Definición base de todas las tablas.
-- `supabase/policies.sql`: Políticas de seguridad RLS (Row Level Security).
-- `supabase/triggers.sql`: Funciones automáticas (ej: crear perfil al registrarse, verificar completitud de curso).
-- `supabase/seed.sql`: Datos de prueba iniciales.
-- `supabase/migrations/`: Scripts de migración para cambios incrementales.
+El Frontend no "piensa", solo presenta. Cuando un usuario hace una pregunta compleja en el chat:
 
-### Flujo de Migraciones
-Para aplicar cambios a la base de datos, recomendamos usar el SQL Editor de Supabase o la CLI.
+1.  **Frontend**: Captura el input del usuario y lo envía al endpoint `/chat` del Backend.
+2.  **Backend (FastAPI)**: Recibe la solicitud, valida la identidad del usuario con Supabase Auth.
+3.  **Supervisor (LangGraph)**: Analiza la intención. ¿Es una duda de código? ¿Es una pregunta conceptual?
+4.  **Enrutamiento**:
+    *   Si es código -> Activa **Programming Agent**.
+    *   Si es concepto -> Activa **Socratic Tutor**.
+    *   Si es peligroso -> Activa **Safety System**.
+5.  **Respuesta**: El agente genera una respuesta (streaming) que FastAPI devuelve al Frontend en tiempo real.
 
-#### 1. Configuración Inicial
-Si estás levantando el proyecto desde cero, ejecuta los scripts en este orden en el SQL Editor de Supabase:
-1.  `schema.sql`
-2.  `policies.sql`
-3.  `triggers.sql`
-4.  `storage-policies.sql`
-
-#### 2. Aplicar Migraciones
-Las migraciones se encuentran en `supabase/migrations/`. Por ejemplo, si necesitas agregar campos a `proyectos_destacados`, busca el archivo `.sql` correspondiente y ejecuta su contenido.
-
-Ejemplo de migración (`add_proyectos_fields.sql`):
-```sql
-ALTER TABLE public.proyectos_destacados 
-ADD COLUMN IF NOT EXISTS tecnologias TEXT[] DEFAULT '{}';
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant FE as Frontend (Next.js)
+    participant BE as Backend (FastAPI)
+    participant S as Supervisor (IA)
+    participant DB as Supabase
+    
+    U->>FE: Envía pregunta: "¿Cómo funciona un `for` loop?"
+    FE->>BE: POST /api/chat {message, user_id}
+    BE->>DB: Verificar Token & Obtener Historial
+    DB-->>BE: Perfil de Usuario + Historial
+    
+    BE->>S: Inyectar Contexto + Pregunta
+    S->>S: Analizar Intención...
+    
+    rect rgb(200, 220, 240)
+        Note over S: Decisión: Nivel Principiante -> Tutor Socrático
+        S->>TutorAgent: Invocar Agente Tutor
+        TutorAgent->>TutorAgent: Generar explicación guiada
+        TutorAgent-->>BE: Respuesta Streaming
+    end
+    
+    BE-->>FE: Stream de Respuesta (Tokens)
+    FE-->>U: Muestra respuesta letra por letra
 ```
-
-### Triggers Importantes
-- **`handle_new_user`**: Se ejecuta automáticamente cuando un usuario se registra en Supabase Auth. Crea una entrada correspondiente en la tabla `public.profiles`.
-- **`check_curso_completion`**: Se ejecuta cada vez que se actualiza `progreso_lecciones`. Verifica si el usuario ha completado todas las lecciones de un curso. Si es así:
-    1.  Marca la inscripción como 'completado'.
-    2.  Genera un registro en la tabla `certificados` con un código único.
 
 ---
 
-## 📦 Instalación y Desarrollo
+## 🧩 Componentes del Sistema
+
+### Frontend: Blog Educativo (`/blog`)
+
+Construido con las últimas tecnologías para garantizar rendimiento y SEO.
+
+*   **Next.js 16**: Utiliza Server Components para renderizar el blog super rápido.
+*   **Supabase Client**: Maneja la sesión del usuario (Login con Google/GitHub mágico).
+*   **Mermaid.js & KateX**: Renderiza diagramas y ecuaciones matemáticas en tiempo real dentro del chat y los artículos.
+
+### Backend: IA & Lógica (`/backend_python_ia`)
+
+El cerebro real. No es solo una API CRUD.
+
+*   **FastAPI**: Maneja las conexiones HTTP y Websockets de baja latencia.
+*   **LangGraph**: Permite crear flujos de conversación cíclicos (Loop: Pensar -> Actuar -> Observar -> Responder).
+*   **Servicios**: Módulos aislados para enviar correos (Gmail/Resend) o procesar archivos (PDFPlumber).
+
+---
+
+## 🧠 Deep Dive: Arquitectura de IA (Backend)
+
+Aquí es donde ocurre la magia. El sistema no utiliza una sola cadena de "Prompt Engineering", sino una **Máquina de Estados Finita (State Graph)** orquestada por `LangGraph`.
+
+### 1. El Grafo (LangGraph)
+
+El grafo define el ciclo de vida de cada mensaje del usuario.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Moderation: Input Usuario
+    
+    state Moderation {
+        [*] --> CheckSafety
+        CheckSafety --> Blocked: Tóxico?
+        CheckSafety --> Retrieval: Seguro?
+    }
+    
+    state Retrieval {
+        [*] --> SearchVectors: Busca en Supabase
+        SearchVectors --> InjectContext: Añade al State
+    }
+    
+    state Supervisor {
+        [*] --> AnalyzeIntent: LLM Decision
+        AnalyzeIntent --> ProgrammingAgent: Código
+        AnalyzeIntent --> TutoringAgent: Conceptos
+        AnalyzeIntent --> EmailAgent: Ayuda Humana
+    }
+    
+    Retrieval --> Supervisor
+    
+    ProgrammingAgent --> [*]: Responde
+    TutoringAgent --> [*]: Responde
+    
+    state EmailAgent {
+        [*] --> CallTool: notify_instructor()
+        CallTool --> [*]: Confirma Envío
+    }
+    
+    Blocked --> [*]: Mensaje de Error
+```
+
+**Explicación de Nodos:**
+*   `Moderation`: Utiliza OpenAI moderations API + filtros personalizados para detectar grooming, suicidio o violencia antes de procesar nada.
+*   `Retrieve`: Realiza una búsqueda semántica (Embeddings) en Supabase para encontrar documentos PDF/Clases relevantes a la pregunta.
+*   `Supervisor`: Decide quién atiende la consulta.
+
+### 2. Sistema de Ruteo (Supervisor)
+
+Ubicado en `app/core/supervisor_agent.py`, utiliza un Prompt de Sistema Clasificador.
+
+*   **Input**: *"Mi código Python tira error en la línea 5"*
+*   **Lógica**:
+    1.  Extrae texto (si hay imágenes).
+    2.  Ejecuta `route_by_llm`: Un LLM pequeño clasifica la intención en `PROGRAMMING`, `TUTORING` o `EMAIL`.
+    3.  Devuelve el siguiente nodo del grafo.
+
+### 3. Agentes Especializados
+
+Cada agente tiene una "Personalidad" instanciada un prompt de sistema único y acceso a herramientas específicas.
+
+#### A. Programming Agent (`app/agents/programming_agent.py`)
+*   **Prompt**: "Eres un experto en Python, C++ y Arduino. Tu objetivo es hacer debugging y explicar errores."
+*   **Comportamiento**: Analiza stack traces, sugiere correcciones de sintaxis y da ejemplos de código. NO da solo la solución, explica el *por qué*.
+
+#### B. Socratic Tutor (`app/agents/tutoring_agent.py`)
+*   **Prompt**: "Eres un educador Socrático. NO des la respuesta directa. Guía al estudiante con preguntas."
+*   **Adaptabilidad**: Ajusta su vocabulario basado en la edad del usuario (extraída de Supabase).
+
+#### C. Email Agent (`app/agents/email_agent.py`)
+*   **Función**: Puente con humanos.
+*   **Herramientas**: Tiene acceso exclusivo a `notify_instructor`.
+*   **Trigger**: Se activa si el usuario dice "Necesito ayuda humana" o "Contacta al profesor".
+
+### 4. Pipeline RAG (Contexto)
+
+El sistema utiliza **RAG (Retrieval-Augmented Generation)** para que la IA sepa sobre el contenido del curso.
+
+1.  **Ingesta**: Los documentos del curso se dividen en chunks y se vectorizan (OpenAI Embeddings).
+2.  **Almacenamiento**: Se guardan en Supabase (`pgvector`).
+3.  **Consulta**:
+    *   En el nodo `retrieve`, la pregunta del usuario se vectoriza.
+    *   Se hace una búsqueda de similitud coseno en Supabase (`match_documents` RPC).
+    *   Los chunks más relevantes se inyectan en el `AgentState` bajo la clave `context`.
+
+---
+
+## 🛠 Guía de Instalación Local
 
 ### Prerrequisitos
-- Node.js 18+
-- Cuenta en Supabase
+*   Node.js 18+
+*   Python 3.10+
+*   Cuenta en Supabase y OpenAI/Google AI.
 
-### Pasos
+### Paso 1: Configurar Backend (Puerto 8000)
 
-1.  **Clonar el repositorio**
+1.  Entra a la carpeta: `cd backend_python_ia`
+2.  Crea entorno virtual:
     ```bash
-    git clone <url-del-repo>
-    cd blog
+    python -m venv venv
+    source venv/bin/activate  # (Windows: venv\Scripts\activate)
     ```
-
-2.  **Instalar dependencias**
-    ```bash
-    npm install
-    ```
-
-3.  **Configurar Variables de Entorno**
-    Crea un archivo `.env.local` basado en `.env.example`:
+3.  Instala librerías: `pip install -r requirements.txt`
+4.  Crea `.env` con tus llaves:
     ```env
-    NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
-    NEXT_PUBLIC_ADMIN_EMAIL=admin@ejemplo.com
+    OPENAI_API_KEY=sk-...
+    SUPABASE_URL=https://xyz.supabase.co
+    SUPABASE_KEY=ey...
     ```
+5.  Corre el servidor: `uvicorn main:app --reload`
 
-4.  **Configurar Base de Datos**
-    Ejecuta los scripts SQL mencionados en la sección "Supabase y Migraciones" en tu dashboard de Supabase.
+### Paso 2: Configurar Frontend (Puerto 3000)
 
-5.  **Configurar Storage**
-    Crea dos buckets públicos en Supabase Storage:
-    - `imagenes`: Para portadas de cursos y assets.
-    - `certificados`: Para almacenar los PDFs generados.
-
-6.  **Iniciar Servidor de Desarrollo**
-    ```bash
-    npm run dev
+1.  Entra a la carpeta: `cd blog`
+2.  Instala dependencias: `npm install`
+3.  Crea `.env.local`:
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=...
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+    NEXT_PUBLIC_API_URL=http://localhost:8000
     ```
-    Visita `http://localhost:3000`.
+4.  Corre la app: `npm run dev`
 
 ---
 
-## 📂 Estructura del Proyecto
+## 🚀 Guía de Despliegue (Producción)
 
-```
-blog/
-├── app/                    # Next.js App Router
-│   ├── (public)/          # Rutas públicas (Landing, Cursos)
-│   ├── admin/             # Rutas protegidas de administración
-│   ├── auth/              # Páginas de Login/Registro
-│   ├── mis-cursos/        # Área privada del estudiante
-│   ├── api/               # API Routes (Generación PDF, etc.)
-│   └── layout.tsx         # Layout raíz
-├── components/            # Componentes React reutilizables
-│   ├── ui/                # Componentes base (Botones, Inputs)
-│   ├── cursos/            # Componentes específicos de cursos
-│   └── admin/             # Componentes del panel admin
-├── lib/                   # Utilidades y configuración
-│   ├── supabase/          # Clientes de Supabase (Client/Server)
-│   └── utils.ts           # Helpers generales
-├── supabase/              # SQL y Migraciones
-│   ├── migrations/        # Scripts de cambios incrementales
-│   └── ...                # Scripts base (schema, policies, etc.)
-└── public/                # Assets estáticos
-```
+### Desplegar Backend en Railway 🚂
+
+1.  Sube tu repo a GitHub.
+2.  Importa el repo en Railway.
+3.  Configura el **Root Directory** en `/backend_python_ia`.
+4.  Configura el **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`.
+5.  Variables clave: `OPENAI_API_KEY`, `SUPABASE_URL`, `GMAIL_CREDENTIALS_JSON`.
+
+### Desplegar Frontend en Vercel ▲
+
+1.  Importa el repo en Vercel.
+2.  **Framework Preset**: Next.js.
+3.  **Root Directory**: `blog`.
+4.  Variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_API_URL` (URL de Railway).
+5.  Deploy.
 
 ---
 
-## 📄 Licencia
+## 👨‍💻 Autor
 
-Este proyecto está bajo la Licencia MIT.
-# Test auto-deploy after reconnecting Vercel
+Este proyecto fue creado y es mantenido por:
+
+**José Ángel Balbuena Palma**  
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/jose-angel-balbuena-palma-52279a177/)
+
+---
+
+**Sistema Iron Makers** v4.0 - Documentación Técnica Avanzada.
